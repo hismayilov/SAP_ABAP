@@ -1,3 +1,5 @@
+***CORRESPONDING RECORDING ZSK_SE11_REC
+
 report ZSK_T_BDC_EMP
        no standard page heading line-size 255.
 
