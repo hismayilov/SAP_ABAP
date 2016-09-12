@@ -275,8 +275,8 @@ ENDFORM.                    " CONVERSION
 *& Report  ZTEST_SK_BAPI_PO
 *&
 *&---------------------------------------------------------------------*
-*&
-*&
+*& Created by Saurabh Khare, SolSynch Technologies
+*& Program to create PO using BAPI for multi-line items (from xcel sheet)
 *&---------------------------------------------------------------------*
 
 REPORT  ztest_sk_bapi_po.
@@ -301,7 +301,19 @@ TYPES: item  LIKE bapimepoitem,
 " PLACEHOLDER
 
 " STRUCTURES TO HOLD BAPI RETURN MESSAGES
-TYPES: return LIKE bapiret2.
+TYPES: return LIKE bapiret2,
+       ret_all LIKE bapiret2.
+
+" STRUCTURES FOR OUT TABLE/ OUT TABLE HEADER
+TYPES: BEGIN OF ty_out_head,
+         f1 TYPE string,
+         f2 TYPE string,
+       END OF ty_out_head,
+
+       BEGIN OF ty_out,
+         file_po   LIKE bapimepoheader-po_number,
+         po_number LIKE bapimepoheader-po_number,
+       END OF ty_out.
 
 " INTERNAL TABLE TO HOLD DATA FROM EXCEL
 DATA: it_tab TYPE STANDARD TABLE OF zst_sk_po_bapi,
@@ -322,8 +334,15 @@ DATA: it_item  TYPE STANDARD TABLE OF item,
       wa_itemx TYPE itemx.
 
 " INTERNAL TABLES FOR PO ITEM DATA
-DATA: it_return TYPE STANDARD TABLE OF return,
-      wa_return TYPE return.
+DATA: it_return TYPE STANDARD TABLE OF return WITH HEADER LINE,
+      "wa_return TYPE return,
+
+      it_ret_all TYPE STANDARD TABLE OF ret_all WITH HEADER LINE.
+"wa_ret_all TYPE ret_all.
+
+" INTERNAL TABLES TO HOLD OUTPUT PO
+DATA: it_out TYPE STANDARD TABLE OF ty_out,
+      wa_out TYPE ty_out.
 
 " INTERNAL TABLES FOR PO SCHEDULE DATA
 " PLACEHOLDER
@@ -338,6 +357,13 @@ DATA: po_num TYPE header-po_number.
 
 " DELETION CHECK WITHIN LOOP - ONLY ONCE
 DATA: del_check TYPE i.
+
+" DIR PATH
+DATA: dir_path TYPE string,
+      out_path_def TYPE string.
+
+" DEF FILE NAME
+DATA: file_out TYPE rlgrap-filename VALUE 'OUT.xls'.
 
 " SYSTEM LANGUAGE
 "DATA: LANG LIKE SY-LANGU.
@@ -356,27 +382,36 @@ AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_file.
     EXPORTING
       program_name  = syst-cprog
       dynpro_number = syst-dynnr
-      field_name    = 'P_FILE'
+      field_name    = 'p_file'
     IMPORTING
       file_name     = p_file.
 
-  CALL FUNCTION 'TEXT_CONVERT_XLS_TO_SAP'
-    EXPORTING
-      i_field_seperator    = c_x
-      i_line_header        = c_x
-      i_tab_raw_data       = it_raw
-      i_filename           = p_file
-    TABLES
-      i_tab_converted_data = it_tab
-    EXCEPTIONS
-      conversion_failed    = 1
-      OTHERS               = 2.
-  IF sy-subrc <> 0.
-    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
-            WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  IF p_file IS NOT INITIAL.
+
+    CALL FUNCTION 'TEXT_CONVERT_XLS_TO_SAP'
+      EXPORTING
+        i_field_seperator    = c_x
+        i_line_header        = c_x
+        i_tab_raw_data       = it_raw
+        i_filename           = p_file
+      TABLES
+        i_tab_converted_data = it_tab
+      EXCEPTIONS
+        conversion_failed    = 1
+        OTHERS               = 2.
+    IF sy-subrc <> 0.
+      MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+              WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+    ENDIF.
+
   ENDIF.
 
 START-OF-SELECTION.
+
+  "POPULATE OUT TABLE HEADER
+  wa_out-file_po = 'FILE INDEX'.
+  wa_out-po_number = 'PO NUMBER'.
+  APPEND wa_out TO it_out.
 
   " DATA POPULATION
   "LANG   = SY-LANGU.
@@ -511,16 +546,81 @@ START-OF-SELECTION.
 *   RETURN        =
                 .
 
+    LOOP AT it_return.  " GENERATE RETURN TABLE FOR ALL PO'S
+      MOVE-CORRESPONDING it_return TO it_ret_all.
+      APPEND it_ret_all.
+    ENDLOOP.
+
     WRITE: / 'CREATED PO WITH NUMBER: ', po_num.
+    wa_out-file_po = wa_tab-po_number.
+    wa_out-po_number = po_num.
+    APPEND wa_out TO it_out.
 
   ENDLOOP.
 
   " WRITE O/P FROM BAPI CALL
 
-  LOOP AT it_return INTO wa_return.
+  LOOP AT it_ret_all.
     ULINE.
-    WRITE: / wa_return-message.
+    WRITE: / it_ret_all-message.
   ENDLOOP.
+
+  " GET DEFAULT PATH FROM INPUT FILE
+  CALL FUNCTION 'SO_SPLIT_FILE_AND_PATH'
+    EXPORTING
+      full_name           = p_file
+    IMPORTING
+*      STRIPPED_NAME       =
+      file_path           = out_path_def
+    EXCEPTIONS
+      x_error             = 1
+      OTHERS              = 2
+            .
+  IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+  CALL METHOD cl_gui_frontend_services=>directory_browse
+    EXPORTING
+      window_title         = 'Select Directory for Output File'
+      initial_folder       = out_path_def
+    CHANGING
+      selected_folder      = dir_path
+    EXCEPTIONS
+      cntl_error           = 1
+      error_no_gui         = 2
+      not_supported_by_gui = 3
+      OTHERS               = 4.
+  IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*            WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+  CONCATENATE dir_path file_out INTO file_out.
+
+  IF file_out IS NOT INITIAL AND it_out IS NOT INITIAL.
+
+    CALL FUNCTION 'SAP_CONVERT_TO_XLS_FORMAT'
+      EXPORTING
+*        i_field_seperator          = c_x
+*        i_line_header              = c_x
+        i_filename                 = file_out
+*     I_APPL_KEEP                = ' '
+      TABLES
+        i_tab_sap_data             = it_out
+*   CHANGING
+*     I_TAB_CONVERTED_DATA       =
+      EXCEPTIONS
+        conversion_failed          = 1
+      OTHERS                       = 2
+              .
+    IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+    ENDIF.
+
+  ENDIF.
 
 *&---------------------------------------------------------------------*
 *&      Form  CONVERSION
