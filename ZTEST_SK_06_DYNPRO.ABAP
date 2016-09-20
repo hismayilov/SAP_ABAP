@@ -14,7 +14,7 @@ DATA: ok_code LIKE sy-ucomm.
 PARAMETERS input(12) TYPE c DEFAULT 'Hello World!'.
 
 * Dynpro
-CALL SCREEN 100.
+CALL SCREEN 100.  " Screen:InterimScreenForHellowworld
 
 *&---------------------------------------------------------------------*
 *&      Module  STATUS_0100  OUTPUT
