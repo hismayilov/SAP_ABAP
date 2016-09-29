@@ -33,7 +33,7 @@ START-OF-SELECTION.
          MTART
          MBRSH
          MATKL
-         FROM MARA INTO TABLE IT_MARA WHERE MATNR = '781827127'.
+         FROM MARA INTO TABLE IT_MARA WHERE MATNR = 'Something_that_doesn't_exist'.
 
     SELECT MATNR
            SPRAS
