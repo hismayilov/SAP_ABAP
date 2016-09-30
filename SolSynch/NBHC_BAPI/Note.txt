@@ -1,0 +1,10 @@
+BAPI RFC/WMS
+PO - ME21N
+MIGO
+SO - VA02
+Invoice:
+For General invoice    FB50   &  f-02
+
+==>For Customer invoice  FB70  &   F-22
+
+For Vendor invoice     FB60   &   f-43
