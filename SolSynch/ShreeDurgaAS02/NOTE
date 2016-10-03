@@ -1,0 +1,5 @@
+Assertion Failed Dump in AS02.
+Solved by applying note 1609794.
+ZCORR_ANLA_HAS_TDDP_S
+
+SOLVED ISSUE IN PRINT PREVIEW OF ZAR05. wRONG TABLE PASSED TO ALV. - passed itab_data2.
