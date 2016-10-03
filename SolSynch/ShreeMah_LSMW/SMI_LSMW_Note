@@ -4,3 +4,7 @@ Changes in Structure relations and Field mapping and conversion rules:
 
 Error Regarding Alternate Unit - MM01_SFGSMI1 - SEE ATTACHED SS
 Error Regarding Maintenance statutes BG cannot be transferred - Added Costing and Accounting Views
+
+Suggested addition of TRAGR(Trans Grp) and LADGR(Loading Grp) in MM01_SMI5 to resolve related error.
+
+Transfered From Dev to Prd by Download / Upload and verified with client for proper operation.
