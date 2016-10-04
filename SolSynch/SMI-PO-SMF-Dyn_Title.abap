@@ -1,6 +1,6 @@
 " Change title based on doc type
 " NACE -> Output Control -> Select EF -> Click Output Types -> Select ZDOM -> Double Click Processing Routines -> Select Smartform
-from print output line 
+" from print output line 
 
 " Global Data -> Initialisation
 *  begin of addition by ashwin m. 3.10.2016
