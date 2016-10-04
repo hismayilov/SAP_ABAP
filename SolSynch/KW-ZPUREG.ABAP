@@ -1,4 +1,6 @@
 " Added Gross, Absolute and Total Discount in ZPUREG
+" PO - MIGO - MIRO
+" QTY AND AMT PICKED FROM MIRO
 
 " Declaration
 " Begin Addition by SaurabhK on 29/09/2016
@@ -22,7 +24,6 @@ LOOP AT it_item.
     IF it_item-menge is NOT INITIAL.
 
       SELECT SINGLE knumv from ekko into v_knumv where ebeln = it_item-ebeln.
-
       IF v_knumv is not INITIAL.
         " Gross
          SELECT SINGLE kbetr from konv into v_kbetr where knumv = v_knumv and kschl = 'R000'.
