@@ -5,7 +5,7 @@
 *& Created by Saurabh Khare, SolSynch Technologies
 *& Creaton On: 18.10.2016
 *& Desc: Program to create handling unit trasnfer posting document
-*& (VLMOVE) using BAPI for mmultiple hand. units (from xcel sheet)
+*& (VLMOVE) using BAPI for mmultiple hand. units
 *&---------------------------------------------------------------------*
 
 REPORT sy-repid.
