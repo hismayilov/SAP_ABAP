@@ -1,24 +1,45 @@
 *&---------------------------------------------------------------------*
 *& Report  ZSOL_MM_MIGO_QLY_REP
-*& Tcode: zmigo_qlty
+*& Tcode:  zmigo_qlty
 *&---------------------------------------------------------------------*
-*&Developed by : Prasad Gurjar
-*&Developed On : 18.10.2016
-*&Description  : MIGO quality criteria
+*& Developed by : Prasad Gurjar
+*& Developed On : 18.10.2016
+*& Description  : MIGO quality criteria
 *&---------------------------------------------------------------------*
 
-REPORT  zsol_mm_migo_qly_rep.
+REPORT  sy-repid.
 
 TYPE-POOLS : slis.
 TABLES : zqlty_data.
 
+TYPES : BEGIN OF ty_qlty,
+          mblnr       TYPE zqlty_data-mblnr,
+          ebeln       TYPE zqlty_data-ebeln,
+          zeile       TYPE zqlty_data-zeile,
+          matnr       TYPE zqlty_data-matnr,
+          mjahr       TYPE zqlty_data-mjahr,
+          werks       TYPE zqlty_data-werks,
+          bukrs       TYPE zqlty_data-bukrs,
+          budat_mkpf  TYPE zqlty_data-budat_mkpf,
+          cpudt_mkpf  TYPE zqlty_data-cpudt_mkpf,
+          menge       TYPE zqlty_data-menge,
+          stren       TYPE zqlty_data-stren,
+          stum        TYPE zqlty_data-stum,
+          weight      TYPE zqlty_data-weight,
+          wum         TYPE zqlty_data-wum,
+        END OF ty_qlty.
+
+DATA : str_qlty TYPE ty_qlty.
+
 TYPES : BEGIN OF ty_final.
-        INCLUDE STRUCTURE zqlty_data.
-TYPES:  maktx TYPE maktx.
+        INCLUDE STRUCTURE str_qlty.
+TYPES : maktx TYPE makt.
 TYPES : END OF ty_final.
 
 DATA: it_final TYPE STANDARD TABLE OF ty_final,
       wa_final TYPE ty_final,
+      it_qlty TYPE STANDARD TABLE OF ty_qlty,
+      wa_qlty TYPE ty_qlty,
       it_makt TYPE STANDARD TABLE OF makt,
       wa_makt TYPE makt.
 
@@ -75,36 +96,39 @@ FORM data_retrivel .
 
   SELECT *
     FROM zqlty_data
-    INTO CORRESPONDING FIELDS OF TABLE it_final
+    INTO CORRESPONDING FIELDS OF TABLE it_qlty
     WHERE mblnr      IN s_mblnr
     AND   mjahr      IN s_mjahr
     AND   budat_mkpf IN s_budat
     AND   cpudt_mkpf IN s_cpudt.
 
-  IF it_final[] IS NOT INITIAL.
+  IF it_qlty[] IS NOT INITIAL.
 
     SELECT *
       FROM makt
       INTO CORRESPONDING FIELDS OF TABLE it_makt
-      FOR ALL ENTRIES IN it_final
-      WHERE matnr EQ it_final-matnr.
+      FOR ALL ENTRIES IN it_qlty
+      WHERE matnr EQ it_qlty-matnr.
 
-    SORT it_final ASCENDING BY mblnr.
-    DATA: v_tabix TYPE sy-tabix.
-    LOOP AT it_final INTO wa_final.
-      v_tabix = sy-tabix.
+    SORT it_qlty ASCENDING BY mblnr.
+
+    LOOP AT it_qlty INTO wa_qlty.
+      MOVE-CORRESPONDING wa_qlty TO wa_final.
       READ TABLE it_makt INTO wa_makt WITH KEY matnr = wa_final-matnr.
       IF sy-subrc = 0.
         wa_final-maktx = wa_makt-maktx.
       ENDIF.
-      MODIFY it_final FROM wa_final TRANSPORTING maktx.
+      APPEND wa_final TO it_final.
     ENDLOOP.
   ENDIF.
 
+**** Insert blank line after each new doc no. ****
   LOOP AT it_final INTO wa_final.
-    AT END OF mblnr.
-      IF wa_final-mblnr IS NOT INITIAL.
-        INSERT INITIAL LINE INTO it_final INDEX ( sy-tabix + 1 ).
+    AT END OF mblnr.  " this field should be the first one in the internal table
+      IF sy-tabix <> 1.
+        IF wa_final-mblnr IS NOT INITIAL.
+          INSERT INITIAL LINE INTO it_final INDEX ( sy-tabix + 1 ).
+        ENDIF.
       ENDIF.
     ENDAT.
   ENDLOOP.
@@ -183,7 +207,7 @@ FORM build_fieldcatalog .
 
   fieldcatalog-fieldname      = 'MENGE'.
   fieldcatalog-seltext_m      = 'Quantity'.
-  fieldcatalog-no_zero        = 'X'.
+  fieldcatalog-no_zero        = 'X'.        " reset 0.000 to blank
   gd_layout-colwidth_optimize = 'X'.
   APPEND fieldcatalog TO fieldcatalog.
   CLEAR  fieldcatalog.
