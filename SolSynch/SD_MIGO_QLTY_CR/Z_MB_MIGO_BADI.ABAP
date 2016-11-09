@@ -1,0 +1,302 @@
+METHOD if_ex_mb_migo_badi~init.
+*************For Quality Criteria tab***************
+  DATA :gf_class_id TYPE migo_class_id VALUE 'MIGO_BADI'. " Class ID for Qlty criteria screen
+  APPEND gf_class_id TO ct_init.
+************End For Quality Criteria tab***************
+ENDMETHOD.
+=================================================================================================
+METHOD if_ex_mb_migo_badi~pbo_detail.
+*************For Quality Criteria tab***************
+  DATA : matnr TYPE goitem-matnr,     " material number
+         mblnr TYPE goitem-mblnr,     " material doc
+         zeile TYPE goitem-zeile,     " line id
+         mtpos TYPE mara-mtpos_mara,  " mat category
+         wa_qlty TYPE zmigo_qlty,     " to check if qlty maintained for mat
+         wa_disp TYPE zqlty_data,     " to check if mat persisted in migo qlty ztab
+         wa_items LIKE LINE OF gt_items.
+
+***** get matnr of line id to be displayed from gt_items *****
+  IF i_line_id IS NOT INITIAL.
+    READ TABLE gt_items INTO wa_items WITH KEY line_id = i_line_id.
+    IF sy-subrc = 0.
+      matnr = wa_items-matnr.
+      mblnr = wa_items-mblnr.
+      zeile = wa_items-zeile.
+    ENDIF.
+  ENDIF.
+
+  IF matnr IS NOT INITIAL.
+******To check material is packing material*******
+    SELECT SINGLE mtpos_mara
+      FROM mara
+      INTO mtpos
+      WHERE matnr = matnr.
+******To check if qlty criteria is maintained for the material******
+    SELECT SINGLE *
+      FROM zmigo_qlty
+      INTO wa_qlty
+      WHERE matnr = matnr.
+  ENDIF.
+
+**** Display Qlty Criteria tab only if mat. cat. is 'verp' and mat is maintained in qlty criteria table
+  IF sy-subrc = 0 AND mtpos = 'VERP' AND wa_qlty IS NOT INITIAL. " material category - packing (verp)
+    IF i_line_id IS NOT INITIAL.
+
+      IF i_class_id EQ 'MIGO_BADI'. " appended in init method
+        e_cprog = 'ZSAPLMIGO_SUBSCREEN'.  " used in disp of custom subscreen
+
+        IF gv_mode = 'A01'.   " GOODS RECEIPT
+          e_dynnr = '0900'.   " Input screen
+        ELSEIF gv_mode = 'A04' OR gv_mode = 'A03'.  " DISPLAY MIGO DOCUMENT / CANCELLATION
+***** Display qlty criteria tab only if mater/line id persisted in zqlty_data (qlty criter mat doc) *****
+          SELECT SINGLE *
+            FROM zqlty_data
+            INTO wa_disp
+            WHERE mblnr = mblnr
+            AND matnr = matnr
+            AND zeile = zeile.
+
+          IF sy-subrc = 0.
+            e_dynnr = '0901'. " Output screen
+          ENDIF.
+        ENDIF.
+
+        e_heading = 'Quality Criteria'(010).  " used in disp of custom subscreen
+******* line id, and zeile to which user is navigating, exported for use in PBO of screen *******
+        EXPORT e_line_id FROM i_line_id TO MEMORY ID 'LNID'.
+        EXPORT zeile FROM zeile TO MEMORY ID 'ZEILE'.
+      ENDIF.
+
+    ENDIF.
+  ENDIF.
+*************End For Quality Criteria tab***************
+ENDMETHOD.
+=================================================================================================
+METHOD if_ex_mb_migo_badi~pai_detail.
+*************For Quality Criteria tab***************
+  e_force_change = 'X'.
+*************End For Quality Criteria tab***************
+ENDMETHOD.
+=================================================================================================
+METHOD if_ex_mb_migo_badi~line_modify.
+*************For Quality Criteria tab***************
+  "Added by Prasad, SauarbhK on 04.10.2016
+
+  DATA : wa_items TYPE zst_gt_items,
+         mod(1) TYPE c. " gt_item modify indicator
+
+  CLEAR mod.
+  gv_ebeln = cs_goitem-ebeln. " set global po number
+
+****** Create gt_items global table for line items *******
+  IF i_line_id IS NOT INITIAL.
+****** update gt_items from cs_goitem if line already exists ******
+    LOOP AT me->gt_items INTO wa_items WHERE line_id = i_line_id.
+      wa_items-line_id = i_line_id.
+      MOVE-CORRESPONDING cs_goitem TO wa_items.
+      MODIFY me->gt_items FROM wa_items.
+      mod = 'X'.
+    ENDLOOP.
+****** append cs_gotitem to gt_items if line does not exist, ******
+****** usually only executed when doc is first loaded ******
+    IF sy-subrc <> 0 AND mod IS INITIAL.
+      wa_items-line_id = i_line_id.
+      MOVE-CORRESPONDING cs_goitem TO wa_items.
+      APPEND wa_items TO me->gt_items.
+    ENDIF.
+  ENDIF.
+****** End of gt_items creation ******
+
+******* Export parameters for use in PBO of custom screen and other BADI methods *******
+  EXPORT i_line_id FROM i_line_id TO MEMORY ID 'LID'.
+  EXPORT cs_goitem-ebeln FROM cs_goitem-ebeln TO MEMORY ID 'EBELN'.
+  EXPORT cs_goitem-matnr FROM cs_goitem-matnr TO MEMORY ID 'MATNR'.
+  EXPORT cs_goitem-take_it FROM cs_goitem-take_it TO MEMORY ID 'ITEMOK'.
+  EXPORT cs_goitem-mblnr FROM cs_goitem-mblnr TO MEMORY ID 'MBLNR'.
+
+*************End For Quality Criteria tab***************
+ENDMETHOD.
+=================================================================================================
+METHOD if_ex_mb_migo_badi~line_delete.
+*************For Quality Criteria tab***************
+  DATA : delflg(1) TYPE c.
+
+***** on line delete *****
+  IF gv_ebeln IS NOT INITIAL.
+    DELETE FROM ztb_migo_temp WHERE lineid = i_line_id AND ebeln = gv_ebeln.  " ebeln considered for concurrency
+    delflg = 'X'. " set and export del flag to avoid re-insertion of that line in screen PBO once deleted here
+  ENDIF.
+
+  EXPORT delflg FROM delflg TO MEMORY ID 'DEL'.
+*************End for Quality Criteria tab***************
+ENDMETHOD.
+=================================================================================================
+METHOD if_ex_mb_migo_badi~check_item.
+
+*************For Quality Criteria tab***************
+  DATA: str(10) TYPE c,
+        wgt(10) TYPE c,
+        sum(10) TYPE c,
+        wum(10) TYPE c.
+
+  DATA: str_val   TYPE zmigo_qlty-stren,    "BRGEW,
+        str_from  TYPE zmigo_qlty-stren,    "BRGEW,
+        str_to    TYPE zmigo_qlty-stren,    "BRGEW,
+        wgt_val   TYPE zmigo_qlty-weight,   "BRGEW,
+        wgt_from  TYPE zmigo_qlty-weight,   "BRGEW,
+        wgt_to    TYPE zmigo_qlty-weight.   "BRGEW,
+
+  DATA : wa_qlty TYPE zmigo_qlty,               " maintained qlty param for current mat
+         it_temp TYPE TABLE OF ztb_migo_temp,
+         wa_temp TYPE ztb_migo_temp,            " data for current line from temp ztab
+         ls_bapiret TYPE bapiret2.              " error messages
+
+  DATA : strflg(1) TYPE c,  " flag for stren input ok
+         wgtflg(1) TYPE c,  " flag for wgt input ok
+         strok(1)  TYPE c,  " flag for stren check ok
+         wgtok(1)  TYPE c.  " flag for wgt check ok
+
+  IF gv_mode = 'A01'. " Goods Receipt
+***** get current line item data from temp qlty criteria tab *****
+    SELECT SINGLE *
+        FROM ztb_migo_temp
+        INTO CORRESPONDING FIELDS OF wa_temp
+        WHERE lineid = i_line_id
+              AND ebeln = gv_ebeln. " ebeln considered for concurrency
+
+    IF sy-subrc = 0.
+
+      CLEAR : strflg, wgtflg, strok, wgtok.
+***** get qlty param maintained for current mat *****
+      SELECT SINGLE *
+            FROM zmigo_qlty
+            INTO CORRESPONDING FIELDS OF wa_qlty
+            WHERE matnr EQ wa_temp-matnr.
+
+      IF sy-subrc = 0.  " Check if quality parameters maintained for material
+
+        str = wa_temp-stren.
+        wgt = wa_temp-weight.
+        sum = wa_temp-stum.
+        wum = wa_temp-wum.
+
+        SHIFT str LEFT DELETING LEADING space.
+        SHIFT wgt LEFT DELETING LEADING space.
+
+        IF str = '0.000'. " display blank instead of 0.000
+          CLEAR str.
+        ENDIF.
+
+        IF wgt = '0.000'. " display blank instead of 0.000
+          CLEAR wgt.
+        ENDIF.
+
+*******************STRENGTH TOLERANCE CALC**********************
+        IF ( str IS NOT INITIAL AND sum IS NOT INITIAL ).
+          str_val = ( wa_qlty-stren * 5 ) / 100 .
+          str_from = str - str_val.
+          str_to = str + str_val.
+          strflg = 'X'. " strnth parameters input ok
+        ELSEIF ( str IS NOT INITIAL AND sum IS INITIAL ) OR ( str IS INITIAL AND sum IS NOT INITIAL ).
+          CLEAR strflg.
+***** Append error message for display in pop-up along with other messages *****
+          ls_bapiret-type = 'E'. " type error
+          ls_bapiret-id = 'ZMIGO_QLTY'. " message class maintained for qlty criteria checks
+          ls_bapiret-number = '000'.  " message number
+          ls_bapiret-message_v1 = i_line_id.  " line id of line in which error occurs
+          APPEND ls_bapiret TO et_bapiret2.
+
+        ENDIF.
+
+*******************WEIGHT TOLERANCE CALC************************
+        IF ( wgt IS NOT INITIAL AND wum IS NOT INITIAL ).
+          wgt_val = ( wa_qlty-weight * 5 ) / 100 .
+          wgt_from = wgt - wgt_val.
+          wgt_to = wgt + wgt_val.
+          wgtflg = 'X'. " weight parameters input ok
+        ELSEIF ( wgt IS NOT INITIAL AND wum IS INITIAL ) OR ( wgt IS INITIAL AND wum IS NOT INITIAL ).
+          CLEAR wgtflg.
+
+          ls_bapiret-type = 'E'.
+          ls_bapiret-id = 'ZMIGO_QLTY'.
+          ls_bapiret-number = '001'.
+          ls_bapiret-message_v1 = i_line_id.
+          APPEND ls_bapiret TO et_bapiret2.
+
+        ENDIF.
+
+*******************STRENGTH TOLERANCE CHECK**********************
+        IF ( strflg IS NOT INITIAL ). " check str input ok
+          IF ( ( wa_qlty-stren NOT BETWEEN str_from AND str_to ) OR ( wa_qlty-stum NE sum ) ).
+            CLEAR strok.
+
+            ls_bapiret-type = 'E'.
+            ls_bapiret-id = 'ZMIGO_QLTY'.
+            ls_bapiret-number = '002'.
+            ls_bapiret-message_v1 = i_line_id.
+            APPEND ls_bapiret TO et_bapiret2.
+
+          ELSE.
+            strok = 'X'.  " strnth check success
+          ENDIF.
+        ENDIF.
+
+*******************WEIGHT TOLERANCE CHECK**********************
+        IF ( wgtflg IS NOT INITIAL ). " check wgt input ok
+          IF ( ( wa_qlty-weight NOT BETWEEN wgt_from AND wgt_to ) OR ( wa_qlty-wum NE wum ) ).
+            CLEAR wgtok.
+
+            ls_bapiret-type = 'E'.
+            ls_bapiret-id = 'ZMIGO_QLTY'.
+            ls_bapiret-number = '003'.
+            ls_bapiret-message_v1 = i_line_id.
+            APPEND ls_bapiret TO et_bapiret2.
+
+          ELSE.
+            wgtok = 'X'.  " weight check success
+          ENDIF.
+        ENDIF.
+
+        wa_temp-strflg = strflg.
+        wa_temp-wgtflg = wgtflg.
+        wa_temp-strok  = strok.
+        wa_temp-wgtok  = wgtok.
+
+        UPDATE ztb_migo_temp FROM wa_temp.  " update flags in temp. qlty tab for current line
+
+      ENDIF.
+
+    ENDIF.
+  ENDIF.
+
+************End For Quality Criteria tab***************
+
+ENDMETHOD.
+=================================================================================================
+METHOD if_ex_mb_migo_badi~mode_set.
+*************For Quality Criteria tab***************
+  gv_mode = i_action. " for use in BADI PBO and post methods
+
+  EXPORT i_action FROM i_action TO MEMORY ID 'MODE'.
+
+******  Clear Ztab if user reinitiates migo ******
+  IF i_action = 'A01' AND gv_ebeln IS NOT INITIAL.
+    DELETE FROM ztb_migo_temp WHERE lineid IS NOT NULL AND ebeln = gv_ebeln. " ebeln considered for concurrency
+  ENDIF.
+******  Does not execute on first init as the sequence is ->
+******  mode_set -> line_modify -> status_header
+******  So, ebeln can only be processed in status_header
+******  Hence, first ztab clear on init occurs in status_header
+*************End for Quality Criteria tab***************
+ENDMETHOD.
+=================================================================================================
+METHOD if_ex_mb_migo_badi~status_and_header.
+*************For Quality Criteria tab***************
+  " Executes on init and each time a line is modified
+****** Clear ztab on first init ******
+  IF gv_ebeln IS NOT INITIAL AND gv_init IS INITIAL.
+    DELETE FROM ztb_migo_temp WHERE lineid IS NOT NULL AND ebeln = gv_ebeln.  " ebeln for concurrency
+    gv_init = 'X'.  " prevents reinit of ztab after first init(Eg for line item change)
+  ENDIF.
+*************End for Quality Criteria tab***************
+ENDMETHOD.
