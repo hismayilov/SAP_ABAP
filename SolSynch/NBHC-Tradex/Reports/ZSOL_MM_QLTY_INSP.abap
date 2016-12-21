@@ -113,7 +113,8 @@ DATA: it_oldvaluesnum  TYPE TABLE OF bapi1003_alloc_values_num,
 
 DATA: v_float TYPE f,
       v_dec   TYPE esecompavg,
-      v_str   TYPE char30.
+      v_str   TYPE char30,
+      v_old   TYPE cha_class_view-sollwert.
 
 DATA: v_clnum  TYPE bapi1003_key-classnum,
       v_cltype TYPE bapi1003_key-classtype,
@@ -134,7 +135,8 @@ DATA: wa_hold   TYPE ztb_trd_hold,
       ctime(10) TYPE c,
       v_held(1) TYPE c,
       v_updby   TYPE xubname,
-      v_data(1) TYPE c.
+      v_actval_check(1) TYPE c,
+      v_hold_count TYPE i.
 
 *&---------------------------------------------------------------------*
 *&  Selection Screen
@@ -204,20 +206,23 @@ FORM data_retrivel .
 
   CONCATENATE p_matnr p_charg INTO v_obj RESPECTING BLANKS.
 
-  SELECT SINGLE *
-    FROM inob
-    INTO CORRESPONDING FIELDS OF wa_inob
-    WHERE objek EQ v_obj.
+  IF v_obj IS NOT INITIAL.
 
-  SELECT *
-    FROM mska
-    INTO CORRESPONDING FIELDS OF TABLE it_mska
-    WHERE matnr EQ p_matnr
-    AND   charg EQ p_charg
-    AND   kains GT 0.
+    SELECT SINGLE *
+      FROM inob
+      INTO CORRESPONDING FIELDS OF wa_inob
+      WHERE objek EQ v_obj.
+
+    SELECT *
+      FROM mska
+      INTO CORRESPONDING FIELDS OF TABLE it_mska
+      WHERE matnr EQ p_matnr
+      AND   charg EQ p_charg
+      AND   kains GT 0.
+
+  ENDIF.
 
   IF it_mska[] IS NOT INITIAL.
-
     SELECT *
       FROM makt
       INTO CORRESPONDING FIELDS OF TABLE it_makt
@@ -251,7 +256,6 @@ FORM data_retrivel .
         FROM ztb_trd_auth
         INTO CORRESPONDING FIELDS OF TABLE it_auth
         WHERE user_id EQ sy-uname.
-
     ENDIF.
   ENDIF.
 
@@ -301,23 +305,7 @@ FORM data_retrivel .
       CLEAR: wa_final, wa_ausp, wa_mska, wa_makt, wa_specs.
     ENDLOOP.
 
-    LOOP AT it_final INTO wa_final WHERE cur_val IS NOT INITIAL.
-      IF ( wa_final-low_lim IS INITIAL AND wa_final-up_lim IS NOT INITIAL ).
-        IF ( wa_final-cur_val GT wa_final-specs ).
-          wa_final-cur_dect = ABS( wa_final-cur_val - wa_final-specs ) * wa_final-dect.
-        ELSE.
-          CLEAR wa_final-cur_dect.
-        ENDIF.
-      ELSEIF ( wa_final-low_lim IS NOT INITIAL AND wa_final-up_lim IS INITIAL ).
-        IF ( wa_final-cur_val LT wa_final-specs ).
-          wa_final-cur_dect = ABS( wa_final-cur_val - wa_final-specs ) * wa_final-dect.
-        ELSE.
-          CLEAR wa_final-cur_dect.
-        ENDIF.
-      ENDIF.
-      MODIFY it_final FROM wa_final.
-      CLEAR wa_final.
-    ENDLOOP.
+    PERFORM calc_prev_dedc.
   ENDIF.
 
 ENDFORM.                    " DATA_RETRIVEL
@@ -545,6 +533,23 @@ FORM user_command USING r_ucomm LIKE sy-ucomm rs_selfield TYPE slis_selfield. "#
     CALL METHOD ref1->check_changed_data.
 
     PERFORM hold.
+    IF v_status = '1'.
+      IF v_hold_count GT 1.
+
+        PERFORM calc_prev_dedc.
+        CALL FUNCTION 'CONVERSION_EXIT_PDATE_OUTPUT'
+          EXPORTING
+            input  = sy-datum
+          IMPORTING
+            output = cdate.
+
+        WRITE sy-uzeit TO ctime.
+
+        rs_selfield-refresh = 'X'.
+      ELSE.
+        rs_selfield-refresh = 'X'.
+      ENDIF.
+    ENDIF.
 
   ELSEIF r_ucomm EQ 'HOLD_SAVE' OR r_ucomm EQ '&DATA_SAVE'.
 
@@ -572,51 +577,52 @@ ENDFORM.                    "user_command
 *----------------------------------------------------------------------*
 FORM hold .
 
-  PERFORM validation.
-
-  CONCATENATE p_matnr p_charg INTO v_obj RESPECTING BLANKS.
-
-  SELECT SINGLE *
-    FROM inob
-    INTO CORRESPONDING FIELDS OF wa_inob
-    WHERE objek EQ v_obj.
-
-  SELECT SINGLE *
-    FROM kssk
-    INTO CORRESPONDING FIELDS OF wa_kssk
-    WHERE objek EQ wa_inob-cuobj.
-
-  SELECT SINGLE *
-    FROM klah
-    INTO CORRESPONDING FIELDS OF wa_klah
-    WHERE clint EQ wa_kssk-clint.
-
-  IF sy-subrc = 0.
-    v_clnum = wa_klah-class.
-    v_cltype = wa_inob-klart.
-    v_objtab = wa_inob-obtab.
-
-    CALL FUNCTION 'BAPI_OBJCL_GETDETAIL'
-      EXPORTING
-        objectkey        = v_obj
-        objecttable      = v_objtab
-        classnum         = v_clnum
-        classtype        = v_cltype
-        keydate          = sy-datum
-        unvaluated_chars = 'X'
-        language         = sy-langu
-      TABLES
-        allocvaluesnum   = it_oldvaluesnum
-        allocvalueschar  = it_oldvalueschar
-        allocvaluescurr  = it_oldvaluescurr
-        return           = it_return.
+  IF it_final[] IS NOT INITIAL.
+    LOOP AT it_final INTO wa_final WHERE act_val IS NOT INITIAL.
+      v_actval_check = 'X'. " atleast one row has non-initial value in actual value
+    ENDLOOP.
   ENDIF.
 
-  LOOP AT it_final INTO wa_final WHERE act_val IS NOT INITIAL.
-    v_data = 'X'.
-  ENDLOOP.
+  IF v_actval_check IS NOT INITIAL. " perform hold only if not all rows are blank for actual value
+    PERFORM validation.
 
-  IF v_data IS NOT INITIAL.
+    CONCATENATE p_matnr p_charg INTO v_obj RESPECTING BLANKS.
+
+    SELECT SINGLE *
+      FROM inob
+      INTO CORRESPONDING FIELDS OF wa_inob
+      WHERE objek EQ v_obj.
+
+    SELECT SINGLE *
+      FROM kssk
+      INTO CORRESPONDING FIELDS OF wa_kssk
+      WHERE objek EQ wa_inob-cuobj.
+
+    SELECT SINGLE *
+      FROM klah
+      INTO CORRESPONDING FIELDS OF wa_klah
+      WHERE clint EQ wa_kssk-clint.
+
+    IF sy-subrc = 0.
+      v_clnum = wa_klah-class.
+      v_cltype = wa_inob-klart.
+      v_objtab = wa_inob-obtab.
+
+      CALL FUNCTION 'BAPI_OBJCL_GETDETAIL'
+        EXPORTING
+          objectkey        = v_obj
+          objecttable      = v_objtab
+          classnum         = v_clnum
+          classtype        = v_cltype
+          keydate          = sy-datum
+          unvaluated_chars = 'X'
+          language         = sy-langu
+        TABLES
+          allocvaluesnum   = it_oldvaluesnum
+          allocvalueschar  = it_oldvalueschar
+          allocvaluescurr  = it_oldvaluescurr
+          return           = it_return.
+    ENDIF.
 
     LOOP AT it_final INTO wa_final.
 
@@ -628,6 +634,11 @@ FORM hold .
           v_str = wa_final-act_val.
 
           PERFORM convert_char_to_float.
+
+          IF v_hold_count GE 1.
+            PERFORM convert_float_to_char.
+            wa_final-cur_val = v_old.
+          ENDIF.
 
           IF v_float IS NOT INITIAL.
             wa_newvaluesnum-value_from = v_float.
@@ -645,6 +656,11 @@ FORM hold .
           IF wa_final-act_val IS NOT INITIAL.
             wa_newvalueschar-value_char = wa_final-act_val.
             wa_newvalueschar-value_neutral = wa_final-act_val.
+
+            IF v_hold_count GE 1.
+              wa_final-cur_val = wa_oldvalueschar-value_char.
+            ENDIF.
+
             APPEND wa_newvalueschar TO it_newvalueschar.
           ELSE.
             APPEND wa_newvalueschar TO it_newvalueschar.
@@ -661,6 +677,11 @@ FORM hold .
 
           PERFORM convert_char_to_float.
 
+          IF v_hold_count GE 1.
+            PERFORM convert_float_to_char.
+            wa_final-cur_val = v_old.
+          ENDIF.
+
           IF v_float IS NOT INITIAL.
             wa_newvaluescurr-value_from = v_float.
             APPEND wa_newvaluescurr TO it_newvaluescurr.
@@ -669,7 +690,10 @@ FORM hold .
           ENDIF.
         ENDIF.
       ENDIF.
-      CLEAR: wa_newvaluesnum, wa_newvalueschar, wa_newvaluescurr.
+      IF v_hold_count GE 1.
+        MODIFY it_final FROM wa_final.
+      ENDIF.
+      CLEAR: wa_final, wa_newvaluesnum, wa_newvalueschar, wa_newvaluescurr.
     ENDLOOP.
 
     CLEAR it_return.
@@ -713,7 +737,7 @@ FORM hold .
 
       INSERT ztb_trd_hold FROM wa_hold.
 
-      COMMIT WORK.
+      ADD 1 TO v_hold_count.
 
       LOOP AT it_final INTO wa_final WHERE act_val IS NOT INITIAL.
         IF ( wa_final-low_lim IS INITIAL AND wa_final-up_lim IS NOT INITIAL ).
@@ -733,28 +757,25 @@ FORM hold .
         CLEAR wa_final.
       ENDLOOP.
       CLEAR wa_hold.
+
+      COMMIT WORK.
     ENDIF.
 
-    IF it_return IS NOT INITIAL.
-      READ TABLE it_return INTO wa_return INDEX 1.
-      IF sy-subrc = 0 AND wa_return-number NE 738.
+**** Display status message ****
+    IF v_status = '1'.
+      MESSAGE 'Characteristics data saved.' TYPE 'I'.
+    ELSE.
+      IF it_return IS NOT INITIAL.
         CALL FUNCTION 'RSCRMBW_DISPLAY_BAPIRET2'
           TABLES
             it_return = it_return.
-      ELSE.
-        MESSAGE 'Characteristics data saved.' TYPE 'I'.
       ENDIF.
     ENDIF.
   ELSE.
-    CLEAR v_data.
-    MESSAGE 'Charcteristic data unchanged.' TYPE 'S'.
+    CLEAR v_actval_check.
+    MESSAGE 'Input empty. No changes made.' TYPE 'S'.
   ENDIF.
 
-*  CLEAR it_final[].
-*  PERFORM data_retrivel.
-*  IF it_final[] IS NOT INITIAL.
-  CALL METHOD ref1->refresh_table_display.
-*  ENDIF.
 ENDFORM.                    " HOLD
 *&---------------------------------------------------------------------*
 *&      Form  SAVE
@@ -919,7 +940,7 @@ FORM last_hold_check .
       UP TO 1 ROWS
       WHERE matnr = p_matnr
       AND charg = p_charg
-      ORDER BY upd_on upd_tim DESCENDING.
+      ORDER BY upd_on DESCENDING.
   ENDSELECT.
 
   IF wa_hold IS NOT INITIAL.
@@ -1035,3 +1056,46 @@ FORM validation .
     ENDCASE.
   ENDLOOP.
 ENDFORM.                    " VALIDATION
+*&---------------------------------------------------------------------*
+*&      Form  CALC_PREV_DEDC
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM calc_prev_dedc .
+  LOOP AT it_final INTO wa_final WHERE cur_val IS NOT INITIAL.
+    IF ( wa_final-low_lim IS INITIAL AND wa_final-up_lim IS NOT INITIAL ).
+      IF ( wa_final-cur_val GT wa_final-specs ).
+        wa_final-cur_dect = ABS( wa_final-cur_val - wa_final-specs ) * wa_final-dect.
+      ELSE.
+        CLEAR wa_final-cur_dect.
+      ENDIF.
+    ELSEIF ( wa_final-low_lim IS NOT INITIAL AND wa_final-up_lim IS INITIAL ).
+      IF ( wa_final-cur_val LT wa_final-specs ).
+        wa_final-cur_dect = ABS( wa_final-cur_val - wa_final-specs ) * wa_final-dect.
+      ELSE.
+        CLEAR wa_final-cur_dect.
+      ENDIF.
+    ENDIF.
+    MODIFY it_final FROM wa_final.
+    CLEAR wa_final.
+  ENDLOOP.
+ENDFORM.                    " CALC_PREV_DEDC
+*&---------------------------------------------------------------------*
+*&      Form  CONERT_FLOAT_TO_CHAR
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM convert_float_to_char .
+  CALL FUNCTION 'QSS0_FLTP_TO_CHAR_CONVERSION'
+    EXPORTING
+      i_number_of_digits = 3
+      i_fltp_value       = wa_oldvaluescurr-value_from
+    IMPORTING
+      e_char_field       = v_old.
+ENDFORM.                    " CONERT_FLOAT_TO_CHAR
