@@ -1,6 +1,6 @@
 *&---------------------------------------------------------------------*
 *& Report  ZSOL_MM_QLTY_INSP
-*& TCODE: ZQI_UPDATE
+*&
 *&---------------------------------------------------------------------*
 *& Developed By : Prasad Gurjar/SaurabhK
 *& Developed on : 17.11.2016
@@ -133,7 +133,8 @@ DATA: wa_hold   TYPE ztb_trd_hold,
       cdate(10) TYPE c,
       ctime(10) TYPE c,
       v_held(1) TYPE c,
-      v_updby   TYPE xubname.
+      v_updby   TYPE xubname,
+      v_data(1) TYPE c.
 
 *&---------------------------------------------------------------------*
 *&  Selection Screen
@@ -611,136 +612,149 @@ FORM hold .
         return           = it_return.
   ENDIF.
 
-  LOOP AT it_final INTO wa_final.
-
-    IF it_oldvaluesnum[] IS NOT INITIAL.
-      READ TABLE it_oldvaluesnum INTO wa_oldvaluesnum WITH KEY charact = wa_final-char.
-      IF sy-subrc = 0.
-        MOVE-CORRESPONDING wa_oldvaluesnum TO wa_newvaluesnum.
-
-        v_str = wa_final-act_val.
-
-        PERFORM convert_char_to_float.
-
-        IF v_float IS NOT INITIAL.
-          wa_newvaluesnum-value_from = v_float.
-          APPEND wa_newvaluesnum TO it_newvaluesnum.
-        ELSE.
-          APPEND wa_newvaluesnum TO it_newvaluesnum.
-        ENDIF.
-      ENDIF.
-    ENDIF.
-
-    IF it_oldvalueschar[] IS NOT INITIAL.
-      READ TABLE it_oldvalueschar INTO wa_oldvalueschar WITH KEY charact = wa_final-char.
-      IF sy-subrc = 0.
-        MOVE-CORRESPONDING wa_oldvalueschar TO wa_newvalueschar.
-        IF wa_final-act_val IS NOT INITIAL.
-          wa_newvalueschar-value_char = wa_final-act_val.
-          wa_newvalueschar-value_neutral = wa_final-act_val.
-          APPEND wa_newvalueschar TO it_newvalueschar.
-        ELSE.
-          APPEND wa_newvalueschar TO it_newvalueschar.
-        ENDIF.
-      ENDIF.
-    ENDIF.
-
-    IF it_oldvaluescurr[] IS NOT INITIAL.
-      READ TABLE it_oldvaluescurr INTO wa_oldvaluescurr WITH KEY charact = wa_final-char.
-      IF sy-subrc = 0.
-        MOVE-CORRESPONDING wa_oldvaluescurr TO wa_newvaluescurr.
-
-        v_str = wa_final-act_val.
-
-        PERFORM convert_char_to_float.
-
-        IF v_float IS NOT INITIAL.
-          wa_newvaluescurr-value_from = v_float.
-          APPEND wa_newvaluescurr TO it_newvaluescurr.
-        ELSE.
-          APPEND wa_newvaluescurr TO it_newvaluescurr.
-        ENDIF.
-      ENDIF.
-    ENDIF.
-    CLEAR: wa_newvaluesnum, wa_newvalueschar, wa_newvaluescurr.
+  LOOP AT it_final INTO wa_final WHERE act_val IS NOT INITIAL.
+    v_data = 'X'.
   ENDLOOP.
 
-  CLEAR it_return.
+  IF v_data IS NOT INITIAL.
 
-  IF ( it_newvaluesnum[] IS NOT INITIAL OR
-       it_newvalueschar[] IS NOT INITIAL OR
-       it_newvaluescurr[] IS NOT INITIAL ).
+    LOOP AT it_final INTO wa_final.
 
-    CALL FUNCTION 'BAPI_OBJCL_CHANGE'
-      EXPORTING
-        objectkey                = v_obj
-        objecttable              = v_objtab
-        classnum                 = v_clnum
-        classtype                = v_cltype
-        status                   = '1'
-*   STANDARDCLASS            =
-*   CHANGENUMBER             =
-        keydate                  = sy-datum
-*   NO_DEFAULT_VALUES        = ' '
-    IMPORTING
-        classif_status           = v_status
-      TABLES
-        allocvaluesnumnew        = it_newvaluesnum
-        allocvaluescharnew       = it_newvalueschar
-        allocvaluescurrnew       = it_newvaluescurr
-        return                   = it_return
-              .
-  ELSE.
-    CLEAR v_status.
-    MESSAGE 'Update unsuccessful. Please check your input!' TYPE 'I' DISPLAY LIKE 'E'.
-  ENDIF.
+      IF it_oldvaluesnum[] IS NOT INITIAL.
+        READ TABLE it_oldvaluesnum INTO wa_oldvaluesnum WITH KEY charact = wa_final-char.
+        IF sy-subrc = 0.
+          MOVE-CORRESPONDING wa_oldvaluesnum TO wa_newvaluesnum.
 
-  IF v_status = '1'.
-    CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'.
+          v_str = wa_final-act_val.
 
-    wa_hold-matnr   = p_matnr.
-    wa_hold-charg   = p_charg.
-    wa_hold-upd_on  = sy-datum.
-    wa_hold-upd_by  = sy-uname.
-    wa_hold-upd_tim = sy-uzeit.
+          PERFORM convert_char_to_float.
 
-    INSERT ztb_trd_hold FROM wa_hold.
-
-    COMMIT WORK.
-
-    LOOP AT it_final INTO wa_final WHERE act_val IS NOT INITIAL.
-      IF ( wa_final-low_lim IS INITIAL AND wa_final-up_lim IS NOT INITIAL ).
-        IF ( wa_final-act_val GT wa_final-specs ).
-          wa_final-act_dect = ABS( wa_final-act_val - wa_final-specs ) * wa_final-dect.
-        ELSE.
-          CLEAR wa_final-act_dect.
-        ENDIF.
-      ELSEIF ( wa_final-low_lim IS NOT INITIAL AND wa_final-up_lim IS INITIAL ).
-        IF ( wa_final-act_val LT wa_final-specs ).
-          wa_final-act_dect = ABS( wa_final-act_val - wa_final-specs ) * wa_final-dect.
-        ELSE.
-          CLEAR wa_final-act_dect.
+          IF v_float IS NOT INITIAL.
+            wa_newvaluesnum-value_from = v_float.
+            APPEND wa_newvaluesnum TO it_newvaluesnum.
+          ELSE.
+            APPEND wa_newvaluesnum TO it_newvaluesnum.
+          ENDIF.
         ENDIF.
       ENDIF.
-      MODIFY it_final FROM wa_final.
-      CLEAR wa_final.
+
+      IF it_oldvalueschar[] IS NOT INITIAL.
+        READ TABLE it_oldvalueschar INTO wa_oldvalueschar WITH KEY charact = wa_final-char.
+        IF sy-subrc = 0.
+          MOVE-CORRESPONDING wa_oldvalueschar TO wa_newvalueschar.
+          IF wa_final-act_val IS NOT INITIAL.
+            wa_newvalueschar-value_char = wa_final-act_val.
+            wa_newvalueschar-value_neutral = wa_final-act_val.
+            APPEND wa_newvalueschar TO it_newvalueschar.
+          ELSE.
+            APPEND wa_newvalueschar TO it_newvalueschar.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+
+      IF it_oldvaluescurr[] IS NOT INITIAL.
+        READ TABLE it_oldvaluescurr INTO wa_oldvaluescurr WITH KEY charact = wa_final-char.
+        IF sy-subrc = 0.
+          MOVE-CORRESPONDING wa_oldvaluescurr TO wa_newvaluescurr.
+
+          v_str = wa_final-act_val.
+
+          PERFORM convert_char_to_float.
+
+          IF v_float IS NOT INITIAL.
+            wa_newvaluescurr-value_from = v_float.
+            APPEND wa_newvaluescurr TO it_newvaluescurr.
+          ELSE.
+            APPEND wa_newvaluescurr TO it_newvaluescurr.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+      CLEAR: wa_newvaluesnum, wa_newvalueschar, wa_newvaluescurr.
     ENDLOOP.
-    CLEAR wa_hold.
-  ENDIF.
 
-  IF it_return IS NOT INITIAL.
-    READ TABLE it_return INTO wa_return INDEX 1.
-    IF sy-subrc = 0 AND wa_return-number NE 738.
-      CALL FUNCTION 'RSCRMBW_DISPLAY_BAPIRET2'
+    CLEAR it_return.
+
+    IF ( it_newvaluesnum[] IS NOT INITIAL OR
+         it_newvalueschar[] IS NOT INITIAL OR
+         it_newvaluescurr[] IS NOT INITIAL ).
+
+      CALL FUNCTION 'BAPI_OBJCL_CHANGE'
+        EXPORTING
+          objectkey                = v_obj
+          objecttable              = v_objtab
+          classnum                 = v_clnum
+          classtype                = v_cltype
+          status                   = '1'
+*   STANDARDCLASS            =
+*   CHANGENUMBER             =
+          keydate                  = sy-datum
+*   NO_DEFAULT_VALUES        = ' '
+      IMPORTING
+          classif_status           = v_status
         TABLES
-          it_return = it_return.
+          allocvaluesnumnew        = it_newvaluesnum
+          allocvaluescharnew       = it_newvalueschar
+          allocvaluescurrnew       = it_newvaluescurr
+          return                   = it_return
+                .
     ELSE.
-      MESSAGE 'Characteristics data saved.' TYPE 'I'.
+      CLEAR v_status.
+      MESSAGE 'Update unsuccessful. Please check your input!' TYPE 'I' DISPLAY LIKE 'E'.
     ENDIF.
+
+    IF v_status = '1'.
+      CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'.
+
+      wa_hold-matnr   = p_matnr.
+      wa_hold-charg   = p_charg.
+      wa_hold-upd_on  = sy-datum.
+      wa_hold-upd_by  = sy-uname.
+      wa_hold-upd_tim = sy-uzeit.
+
+      INSERT ztb_trd_hold FROM wa_hold.
+
+      COMMIT WORK.
+
+      LOOP AT it_final INTO wa_final WHERE act_val IS NOT INITIAL.
+        IF ( wa_final-low_lim IS INITIAL AND wa_final-up_lim IS NOT INITIAL ).
+          IF ( wa_final-act_val GT wa_final-specs ).
+            wa_final-act_dect = ABS( wa_final-act_val - wa_final-specs ) * wa_final-dect.
+          ELSE.
+            CLEAR wa_final-act_dect.
+          ENDIF.
+        ELSEIF ( wa_final-low_lim IS NOT INITIAL AND wa_final-up_lim IS INITIAL ).
+          IF ( wa_final-act_val LT wa_final-specs ).
+            wa_final-act_dect = ABS( wa_final-act_val - wa_final-specs ) * wa_final-dect.
+          ELSE.
+            CLEAR wa_final-act_dect.
+          ENDIF.
+        ENDIF.
+        MODIFY it_final FROM wa_final.
+        CLEAR wa_final.
+      ENDLOOP.
+      CLEAR wa_hold.
+    ENDIF.
+
+    IF it_return IS NOT INITIAL.
+      READ TABLE it_return INTO wa_return INDEX 1.
+      IF sy-subrc = 0 AND wa_return-number NE 738.
+        CALL FUNCTION 'RSCRMBW_DISPLAY_BAPIRET2'
+          TABLES
+            it_return = it_return.
+      ELSE.
+        MESSAGE 'Characteristics data saved.' TYPE 'I'.
+      ENDIF.
+    ENDIF.
+  ELSE.
+    CLEAR v_data.
+    MESSAGE 'Charcteristic data unchanged.' TYPE 'S'.
   ENDIF.
 
+*  CLEAR it_final[].
+*  PERFORM data_retrivel.
+*  IF it_final[] IS NOT INITIAL.
   CALL METHOD ref1->refresh_table_display.
-
+*  ENDIF.
 ENDFORM.                    " HOLD
 *&---------------------------------------------------------------------*
 *&      Form  SAVE
@@ -754,8 +768,12 @@ FORM save.
 
   IF v_status = '1'.
 
-    LOOP AT it_final INTO wa_final WHERE act_val IS NOT INITIAL.
-
+    LOOP AT it_final INTO wa_final. "WHERE act_val IS NOT INITIAL.
+      IF wa_final-act_val IS INITIAL AND wa_final-cur_val IS NOT INITIAL.
+        wa_final-act_val = wa_final-cur_val.
+      ELSEIF wa_final-act_val IS INITIAL AND wa_final-cur_val IS INITIAL.
+        CONTINUE.
+      ENDIF.
       READ TABLE it_auth INTO wa_auth WITH KEY user_id = sy-uname.
 **********
 *** CHECK ACT_VAL TYPE
@@ -973,29 +991,44 @@ ENDFORM.                    " CONVERT_CHAR_TO_FLOAT
 *  <--  p2        text
 *----------------------------------------------------------------------*
 FORM validation .
-  DATA: v_htype LIKE dd01v-datatype.
+  DATA: out_val(30) TYPE c.
   LOOP AT it_final INTO wa_final WHERE act_val IS NOT INITIAL.
     CASE wa_final-type.
       WHEN 'NUM'.
-        CALL FUNCTION 'NUMERIC_CHECK'
+        CALL FUNCTION 'CATS_NUMERIC_INPUT_CHECK'
           EXPORTING
-            string_in        = wa_final-act_val
+            input            = wa_final-act_val
+*           INTERNAL         = 'X'
          IMPORTING
-*       STRING_OUT       =
-            htype            = v_htype
+           output           = out_val
+*         EXCEPTIONS
+*           NO_NUMERIC       = 1
+*           OTHERS           = 2
                   .
-        IF v_htype NE 'NUMC'.
+        IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+        ENDIF.
+
+        IF out_val IS INITIAL.
           MESSAGE 'Type mismatch in input.' TYPE 'E'.
         ENDIF.
       WHEN 'CHAR'.
-        CALL FUNCTION 'NUMERIC_CHECK'
-          EXPORTING
-            string_in        = wa_final-act_val
-         IMPORTING
-*       STRING_OUT       =
-            htype            = v_htype
-                  .
-        IF v_htype NE 'CHAR'.
+        CALL FUNCTION 'CATS_NUMERIC_INPUT_CHECK'
+      EXPORTING
+        input            = wa_final-act_val
+*           INTERNAL         = 'X'
+     IMPORTING
+       output           = out_val
+*         EXCEPTIONS
+*           NO_NUMERIC       = 1
+*           OTHERS           = 2
+              .
+        IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+        ENDIF.
+        IF out_val IS NOT INITIAL.
           MESSAGE 'Type mismatch in input.' TYPE 'E'.
         ENDIF.
       WHEN OTHERS.
