@@ -11,7 +11,8 @@ PROGRAM  zsaplmigo_subscreen.
 DATA: str(10) TYPE c,
       wgt(10) TYPE c,
       sum(10) TYPE c,
-      wum(10) TYPE c.
+      wum(10) TYPE c,
+      note(100) TYPE c.
 
 DATA : lineid TYPE mb_line_id,      " line id to which user is navigating
        lid TYPE mb_line_id,         " current line id
@@ -19,7 +20,8 @@ DATA : lineid TYPE mb_line_id,      " line id to which user is navigating
        matnr TYPE goitem-matnr,     " mat number
        ebeln TYPE goitem-ebeln,     " po number
        zeile TYPE goitem-zeile,     " item number
-       itemok TYPE goitem-take_it.  " item adopted in current document
+       itemok TYPE goitem-take_it,  " item adopted in current document
+       valid(1) TYPE c.
 
 DATA : wa_temp TYPE ztb_migo_temp,  " inserted or updated to temp tab
        wa_temp1 TYPE ztb_migo_temp. " to check if line exists in temp tab
@@ -45,10 +47,27 @@ MODULE status_0900 OUTPUT.  " Goods Receipt Screen
   IMPORT cs_goitem-matnr TO matnr FROM MEMORY ID 'MATNR'. " mat number
   IMPORT cs_goitem-take_it TO itemok FROM MEMORY ID 'ITEMOK'. " item adoption in doc status
   IMPORT delflg TO delflg FROM MEMORY ID 'DEL'. " del indicator for current line
+  IMPORT valid TO valid FROM MEMORY ID 'VALID'. " indicates whether material is qlty eligible
 
 *** Execution sequence -> Screen PAI -> line_modify -> BADI PBO -> Screen PBO ***
 *** For post/check -> line_modify -> check -> line_modify -> check ->...-> post
 *** Basic flow is insert or update current line and get and display data for line to which user is navigating ***
+
+*** check if material is qlty eligible and enable/disbale screen accordingly.
+  IF valid IS INITIAL.
+    LOOP AT SCREEN.
+      screen-input = 0.
+      note = 'Note: Quality input not possible for this material.'.
+      MODIFY SCREEN.
+    ENDLOOP.
+    MESSAGE 'Quality input not possible for this material' TYPE 'S'.
+  ELSE.
+    LOOP AT SCREEN.
+      screen-input = 1.
+      note = 'Note: Please press enter after entering quality parameters'.
+      MODIFY SCREEN.
+    ENDLOOP.
+  ENDIF.
 
 ***** Insert or Update in temp ztab for line items *****
   IF ( lid IS NOT INITIAL AND matnr IS NOT INITIAL AND ebeln IS NOT INITIAL ).
@@ -77,6 +96,17 @@ MODULE status_0900 OUTPUT.  " Goods Receipt Screen
 **** insert other wise, but donot re-insert if del flg is set
       ELSEIF delflg IS INITIAL.
         INSERT ztb_migo_temp FROM wa_temp.
+      ENDIF.
+    ELSE. " when user clears qlty criteria for current line
+      SELECT SINGLE lineid
+                    matnr
+                    FROM ztb_migo_temp
+                    INTO CORRESPONDING FIELDS OF wa_temp1
+                    WHERE lineid = lid  " current line/ line from which user is navigating
+                    AND matnr = matnr
+                    AND ebeln = ebeln.  " ebeln considered for concurrency
+      IF sy-subrc = 0 .
+        DELETE FROM ztb_migo_temp WHERE lineid = lid AND matnr = matnr AND ebeln = ebeln.  " ebeln considered for concurrency
       ENDIF.
     ENDIF.  " end if for existence of atleast one qlty param for current line
 
