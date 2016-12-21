@@ -6,14 +6,18 @@ METHOD if_ex_mb_migo_badi~init.
 ENDMETHOD.
 =================================================================================================
 METHOD if_ex_mb_migo_badi~pbo_detail.
+
+  " changed on 14/11/16 by SaurabhK - > mtpos_mara to mtart for check on mat. type
+
 *************For Quality Criteria tab***************
   DATA : matnr TYPE goitem-matnr,     " material number
          mblnr TYPE goitem-mblnr,     " material doc
          zeile TYPE goitem-zeile,     " line id
-         mtpos TYPE mara-mtpos_mara,  " mat category
+         mtart TYPE mara-mtart,       " mat category
          wa_qlty TYPE zmigo_qlty,     " to check if qlty maintained for mat
          wa_disp TYPE zqlty_data,     " to check if mat persisted in migo qlty ztab
-         wa_items LIKE LINE OF gt_items.
+         wa_items LIKE LINE OF gt_items,
+         valid(1) TYPE c.             " flag - check if qlty screen is valid for current mat
 
 ***** get matnr of line id to be displayed from gt_items *****
   IF i_line_id IS NOT INITIAL.
@@ -27,9 +31,9 @@ METHOD if_ex_mb_migo_badi~pbo_detail.
 
   IF matnr IS NOT INITIAL.
 ******To check material is packing material*******
-    SELECT SINGLE mtpos_mara
+    SELECT SINGLE mtart
       FROM mara
-      INTO mtpos
+      INTO mtart
       WHERE matnr = matnr.
 ******To check if qlty criteria is maintained for the material******
     SELECT SINGLE *
@@ -39,36 +43,41 @@ METHOD if_ex_mb_migo_badi~pbo_detail.
   ENDIF.
 
 **** Display Qlty Criteria tab only if mat. cat. is 'verp' and mat is maintained in qlty criteria table
-  IF sy-subrc = 0 AND mtpos = 'VERP' AND wa_qlty IS NOT INITIAL. " material category - packing (verp)
-    IF i_line_id IS NOT INITIAL.
+  IF sy-subrc = 0 AND mtart = 'VERP' AND wa_qlty IS NOT INITIAL. " material category - packing (verp)
+    valid = 'X'.  " used in Screen PBO to disable/enable custom screen
+  ELSE.
+    CLEAR valid.
+  ENDIF.
 
-      IF i_class_id EQ 'MIGO_BADI'. " appended in init method
-        e_cprog = 'ZSAPLMIGO_SUBSCREEN'.  " used in disp of custom subscreen
+  IF i_line_id IS NOT INITIAL.
 
-        IF gv_mode = 'A01'.   " GOODS RECEIPT
-          e_dynnr = '0900'.   " Input screen
-        ELSEIF gv_mode = 'A04' OR gv_mode = 'A03'.  " DISPLAY MIGO DOCUMENT / CANCELLATION
+    IF i_class_id EQ 'MIGO_BADI'. " appended in init method
+      e_cprog = 'ZSAPLMIGO_SUBSCREEN'.  " used in disp of custom subscreen
+
+      IF gv_mode = 'A01'.   " GOODS RECEIPT
+        e_dynnr = '0900'.   " Input screen
+      ELSEIF gv_mode = 'A04' OR gv_mode = 'A03'.  " DISPLAY MIGO DOCUMENT / CANCELLATION
 ***** Display qlty criteria tab only if mater/line id persisted in zqlty_data (qlty criter mat doc) *****
-          SELECT SINGLE *
-            FROM zqlty_data
-            INTO wa_disp
-            WHERE mblnr = mblnr
-            AND matnr = matnr
-            AND zeile = zeile.
+        SELECT SINGLE *
+          FROM zqlty_data
+          INTO wa_disp
+          WHERE mblnr = mblnr
+          AND matnr = matnr
+          AND zeile = zeile.
 
-          IF sy-subrc = 0.
-            e_dynnr = '0901'. " Output screen
-          ENDIF.
+        IF sy-subrc = 0.
+          e_dynnr = '0901'. " Output screen
         ENDIF.
-
-        e_heading = 'Quality Criteria'(010).  " used in disp of custom subscreen
-******* line id, and zeile to which user is navigating, exported for use in PBO of screen *******
-        EXPORT e_line_id FROM i_line_id TO MEMORY ID 'LNID'.
-        EXPORT zeile FROM zeile TO MEMORY ID 'ZEILE'.
       ENDIF.
 
+      e_heading = 'Quality Criteria'(010).  " used in disp of custom subscreen
+******* line id, and zeile to which user is navigating, exported for use in PBO of screen *******
+      EXPORT e_line_id FROM i_line_id TO MEMORY ID 'LNID'.
+      EXPORT zeile FROM zeile TO MEMORY ID 'ZEILE'.
     ENDIF.
   ENDIF.
+
+  EXPORT valid FROM valid TO MEMORY ID 'VALID'. " exported for use in screen PBO
 *************End For Quality Criteria tab***************
 ENDMETHOD.
 =================================================================================================
