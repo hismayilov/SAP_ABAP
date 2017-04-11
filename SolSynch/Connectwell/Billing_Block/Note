@@ -1,0 +1,18 @@
+The billing block module for sales order items has been implemented in Connectwell Dev system.
+ 
+Please note the following details for the same:
+Module flow:
+1. T-Code: ZSD_BILLBLOCK.
+Input: 
+ 
+Output:
+All sales order items that have a credit billing block (ZC).
+ 
+Here you can select and release the billing block on the line items using the Green Flag icon.
+These items are then stored in a ZTABLE - ZSOL_BILLBLOCK
+Report:  ZSOL_SD_REL_BILL_BLOCK 
+ 
+2. Every 24 hours the following report can be scheduled in the background to check if any of the entries in the ZTABLE has exceeded 48 hours and the billing is still not done. In that case the billing block(ZC) will be re-applied to such items.
+Report:   ZSOL_SD_REV_BILL_BLOCK 
+ 
+Apart from the above reports, I have also monitored a change in Credit Billing Block via MV45AFZZ and added entries in the ZTABLE if a change is noticed. This will keep all billing block related changes synch'ed in the ZTABLE thus avoiding any inconsistensies in case of manual changes via VA02 or other modes.
