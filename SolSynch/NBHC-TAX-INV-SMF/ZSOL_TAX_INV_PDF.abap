@@ -82,14 +82,14 @@ INITIALIZATION.
     EXPORTING
       i_language                   = sy-langu
 *     I_APPLICATION                = 'SAPDEFAULT'
-   IMPORTING
-     e_devtype                    = v_devtype
-   EXCEPTIONS
-     no_language                  = 1
-     language_not_installed       = 2
-     no_devtype_found             = 3
-     system_error                 = 4
-     OTHERS                       = 5
+    IMPORTING
+      e_devtype                    = v_devtype
+    EXCEPTIONS
+      no_language                  = 1
+      language_not_installed       = 2
+      no_devtype_found             = 3
+      system_error                 = 4
+      OTHERS                       = 5
             .
   IF sy-subrc <> 0.
     MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
@@ -137,8 +137,8 @@ FORM get_data .
       AND   fkart EQ 'YTRD'.
   ELSE.
     MESSAGE 'Please provide atleast one input: invoice number and/or date.' TYPE 'S' DISPLAY LIKE 'E'.
-    " LEAVE LIST-PROCESSING.
-    STOP.
+    LEAVE LIST-PROCESSING.
+    "STOP.
   ENDIF.
 ENDFORM.                    " GET_DATA
 *&---------------------------------------------------------------------*
