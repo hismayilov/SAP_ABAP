@@ -119,9 +119,6 @@ END-OF-SELECTION.
     MESSAGE 'No Invoices found for given criteria.' TYPE 'I' DISPLAY LIKE 'E'.
     EXIT.
   ENDIF.
-
-
-
 *&---------------------------------------------------------------------*
 *&      Form  GET_DATA
 *&---------------------------------------------------------------------*
@@ -286,6 +283,7 @@ FORM download_pdf .
     CLEAR: wa_invo, filename, fullpath.
   ENDLOOP.
 
+" Write log
   IF it_log IS NOT INITIAL.
     DESCRIBE TABLE it_log LINES lv_lines.
     SHIFT lv_lines LEFT DELETING LEADING space.
