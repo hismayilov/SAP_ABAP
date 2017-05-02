@@ -136,7 +136,7 @@ FORM get_data .
       AND   fkdat IN s_date
       AND   fkart EQ 'YTRD'.
   ELSE.
-    MESSAGE 'Please provide altleast one input: invoice number and/or date.' TYPE 'S' DISPLAY LIKE 'E'.
+    MESSAGE 'Please provide atleast one input: invoice number and/or date.' TYPE 'S' DISPLAY LIKE 'E'.
     " LEAVE LIST-PROCESSING.
     STOP.
   ENDIF.
