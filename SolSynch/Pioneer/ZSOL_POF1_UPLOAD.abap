@@ -1,8 +1,9 @@
 *---- POF1 Upload Prog. ----*
 *---- Author: SaurabhK for Solsynch Technologies ----*
-*---- Description: BDC for POf1 (pack. instr.) upload ---- *
+*---- Date: 03.05.17 05:05 PM ----*
+*---- Description: BDC for POF1 (pack. instr.) upload ---- *
 
-REPORT ztest_pof1
+REPORT zsol_pof1_upload
        NO STANDARD PAGE HEADING LINE-SIZE 255.
 
 INCLUDE bdcrecx1.
@@ -81,7 +82,7 @@ START-OF-SELECTION.
   PERFORM bdc_field       USING 'BDC_OKCODE'
                                 '/00'.
   PERFORM bdc_field       USING 'P000-DATAB'
-                                '02.05.2017'. " Verify upload(valid from) Date
+                                '01.04.2017'. " Verify upload(valid from) Date
   PERFORM bdc_field       USING 'P000-DATBI'
                                 '31.12.9999'.
 * ---- Loop for Table Control ---- *
