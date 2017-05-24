@@ -14,7 +14,7 @@ REPORT  zsol_mm_qlty_insp.
 
 TYPE-POOLS : slis.
 
-TABLES: mara,mchb.
+TABLES: mara,mchb,ztb_trd_specs.
 
 DATA: fieldcatalog TYPE slis_t_fieldcat_alv WITH HEADER LINE,
       gd_layout    TYPE slis_layout_alv,
@@ -61,6 +61,34 @@ TYPES: BEGIN OF ty_char,
         atbez TYPE cabnt-atbez,
        END OF ty_char.
 
+* ---- For Dynamic F4 ---- *
+TYPES: BEGIN OF ty_shmat,
+        sow TYPE ztb_trd_specs-vbeln,
+        mat TYPE ztb_trd_specs-matnr,
+       END OF ty_shmat,
+
+       BEGIN OF ty_shbat,
+        sow TYPE ztb_trd_specs-vbeln,
+        bat TYPE ztb_trd_specs-charg,
+       END OF ty_shbat,
+
+       BEGIN OF ty_shlor,
+        sow TYPE ztb_trd_specs-vbeln,
+        lor TYPE ztb_trd_specs-lorry_no,
+       END OF ty_shlor.
+
+DATA: BEGIN OF t_field OCCURS 0,      "Fieldlist im SELECT-Statement
+         fname LIKE dntab-fieldname,
+      END OF t_field.
+
+* ---- For Dynamic F4 ---- *
+DATA: it_shmat       TYPE TABLE OF ty_shmat,
+      it_shbat       TYPE TABLE OF ty_shbat,
+      it_shlor       TYPE TABLE OF ty_shlor,
+      it_dynpfields  TYPE TABLE OF dynpread WITH HEADER LINE,
+      it_shreturn    TYPE TABLE OF ddshretval WITH HEADER LINE.
+
+* ---- Internal Tables ---- *
 DATA: it_final  TYPE TABLE OF ty_final,
       wa_final  TYPE ty_final,
       it_mska   TYPE STANDARD TABLE OF mska,
@@ -86,7 +114,8 @@ DATA: it_final  TYPE TABLE OF ty_final,
 DATA: desc        TYPE makt-maktx,
       v_status(1) TYPE c,
       v_qty       TYPE mska-kains,
-      v_sow       TYPE vbeln.
+      v_sow       TYPE vbeln,
+      gv_vbeln    TYPE ztb_trd_specs-vbeln.   " For Dynamic F4
 
 DATA: mat_doc    TYPE bapi2017_gm_head_ret-mat_doc,
       doc_year   TYPE bapi2017_gm_head_ret-doc_year,
@@ -143,13 +172,27 @@ DATA: wa_hold   TYPE ztb_trd_hold,
 *&---------------------------------------------------------------------*
 
 SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE t1.
-PARAMETERS: p_matnr LIKE mara-matnr OBLIGATORY,  " material
-            p_charg LIKE mchb-charg OBLIGATORY.  " batch
+PARAMETERS: p_vbeln LIKE mska-vbeln OBLIGATORY,  " SOW
+            p_matnr LIKE mara-matnr OBLIGATORY,  " material
+            p_charg LIKE mchb-charg OBLIGATORY,  " Batch
+            p_lorry LIKE ztb_trd_specs-lorry_no. " lorry no.
 SELECTION-SCREEN END OF BLOCK b1.
 
 SELECTION-SCREEN BEGIN OF BLOCK b15 WITH FRAME TITLE text-002 .
 PARAMETERS: variant LIKE disvariant-variant NO-DISPLAY.
 SELECTION-SCREEN END OF BLOCK b15.
+
+*&---------------------------------------------------------------------*
+*&  At Selection Screen Events
+*&---------------------------------------------------------------------*
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_matnr.
+  PERFORM dyn_f4 TABLES it_shmat USING 'P_MATNR' 'MATNR'.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_charg.
+  PERFORM dyn_f4 TABLES it_shbat USING 'P_CHARG' 'CHARG'.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_lorry.
+  PERFORM dyn_f4 TABLES it_shlor USING 'P_LORRY' 'LORRY_NO'.
 
 *&---------------------------------------------------------------------*
 *&  Initialization
@@ -201,8 +244,10 @@ START-OF-SELECTION.
 *----------------------------------------------------------------------*
 FORM data_retrivel .
 
+  TRANSLATE p_vbeln TO UPPER CASE.
   TRANSLATE p_matnr TO UPPER CASE.
   TRANSLATE p_charg TO UPPER CASE.
+  TRANSLATE p_lorry TO UPPER CASE.
 
   CONCATENATE p_matnr p_charg INTO v_obj RESPECTING BLANKS.
 
@@ -218,6 +263,7 @@ FORM data_retrivel .
       INTO CORRESPONDING FIELDS OF TABLE it_mska
       WHERE matnr EQ p_matnr
       AND   charg EQ p_charg
+      AND   vbeln EQ p_vbeln
       AND   kains GT 0.
 
   ENDIF.
@@ -234,7 +280,9 @@ FORM data_retrivel .
       INTO CORRESPONDING FIELDS OF TABLE it_specs
       FOR ALL ENTRIES IN it_mska
       WHERE vbeln EQ it_mska-vbeln
-      AND   posnr EQ it_mska-posnr.
+      AND   posnr EQ it_mska-posnr
+      AND   matnr EQ it_mska-matnr
+      AND   lorry_no EQ p_lorry.
 
     IF it_specs[] IS NOT INITIAL.
       SELECT *
@@ -465,6 +513,13 @@ FORM top-of-page.
   wa_header-typ  = 'S'.
   wa_header-key = 'CAD: '.
   wa_header-info = p_charg.
+  APPEND wa_header TO t_header.
+  CLEAR: wa_header.
+
+*Lorry No.
+  wa_header-typ  = 'S'.
+  wa_header-key = 'Lorry No.: '.
+  wa_header-info = p_lorry.
   APPEND wa_header TO t_header.
   CLEAR: wa_header.
 *Qty in inspect. stock
@@ -729,8 +784,10 @@ FORM hold .
     IF v_status = '1'.
       CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'.
 
+      wa_hold-vbeln   = p_vbeln.
       wa_hold-matnr   = p_matnr.
       wa_hold-charg   = p_charg.
+      wa_hold-lorry_no   = p_lorry.
       wa_hold-upd_on  = sy-datum.
       wa_hold-upd_by  = sy-uname.
       wa_hold-upd_tim = sy-uzeit.
@@ -938,8 +995,10 @@ FORM last_hold_check .
       FROM ztb_trd_hold
       INTO wa_hold
       UP TO 1 ROWS
-      WHERE matnr = p_matnr
+      WHERE vbeln = p_vbeln
+      AND matnr = p_matnr
       AND charg = p_charg
+      AND lorry_no = p_lorry
       ORDER BY upd_on DESCENDING.
   ENDSELECT.
 
@@ -971,7 +1030,8 @@ FORM db_update .
   UPDATE ztb_trd_specs SET act_dect = wa_final-act_dect
               WHERE vbeln = wa_final-sales_doc
               AND   atnam = wa_final-char
-              AND   matnr = wa_final-mat.
+              AND   matnr = wa_final-mat
+              AND   lorry_no = p_lorry.
   COMMIT WORK.
 ENDFORM.                    " DB_UPDATE
 *&---------------------------------------------------------------------*
@@ -1020,15 +1080,15 @@ FORM validation .
           EXPORTING
             input            = wa_final-act_val
 *           INTERNAL         = 'X'
-         IMPORTING
-           output           = out_val
-*         EXCEPTIONS
-*           NO_NUMERIC       = 1
-*           OTHERS           = 2
+          IMPORTING
+            output           = out_val
+          EXCEPTIONS
+            no_numeric       = 1
+            OTHERS           = 2
                   .
         IF sy-subrc <> 0.
-* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
-*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+          MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+                  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
         ENDIF.
 
         IF out_val IS INITIAL.
@@ -1036,18 +1096,18 @@ FORM validation .
         ENDIF.
       WHEN 'CHAR'.
         CALL FUNCTION 'CATS_NUMERIC_INPUT_CHECK'
-      EXPORTING
-        input            = wa_final-act_val
+          EXPORTING
+            input            = wa_final-act_val
 *           INTERNAL         = 'X'
-     IMPORTING
-       output           = out_val
-*         EXCEPTIONS
-*           NO_NUMERIC       = 1
-*           OTHERS           = 2
+          IMPORTING
+            output           = out_val
+          EXCEPTIONS
+            no_numeric       = 1
+            OTHERS           = 2
               .
         IF sy-subrc <> 0.
-* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
-*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+          MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+                  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
         ENDIF.
         IF out_val IS NOT INITIAL.
           MESSAGE 'Type mismatch in input.' TYPE 'E'.
@@ -1099,3 +1159,86 @@ FORM convert_float_to_char .
     IMPORTING
       e_char_field       = v_old.
 ENDFORM.                    " CONERT_FLOAT_TO_CHAR
+
+*&---------------------------------------------------------------------*
+*&      Form  DYN_F4
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_0634   text
+*----------------------------------------------------------------------*
+FORM dyn_f4  TABLES p_table USING    value(p_field) value(p_fname).
+
+  REFRESH it_dynpfields.
+
+  it_dynpfields-fieldname = 'P_VBELN'.
+  APPEND it_dynpfields.
+
+* ---- Get sow value on the selection screen ---- *
+  CALL FUNCTION 'DYNP_VALUES_READ'
+    EXPORTING
+      dyname               = sy-repid
+      dynumb               = sy-dynnr
+    TABLES
+      dynpfields           = it_dynpfields
+    EXCEPTIONS
+      invalid_abapworkarea = 1
+      invalid_dynprofield  = 2
+      invalid_dynproname   = 3
+      invalid_dynpronummer = 4
+      invalid_request      = 5
+      no_fielddescription  = 6
+      invalid_parameter    = 7
+      undefind_error       = 8
+      double_conversion    = 9
+      stepl_not_found      = 10
+      OTHERS               = 11.
+
+  IF sy-subrc <> 0.
+    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+            WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ELSE.
+    READ TABLE it_dynpfields WITH KEY fieldname = 'P_VBELN'.
+    IF sy-subrc = 0.
+      gv_vbeln = it_dynpfields-fieldvalue.
+    ENDIF.
+  ENDIF.
+
+  IF gv_vbeln IS NOT INITIAL.
+    REFRESH t_field[].
+    t_field-fname = 'VBELN'.
+    APPEND t_field.
+    t_field-fname = p_fname.
+    APPEND t_field.
+
+    SELECT DISTINCT (t_field)
+      FROM ztb_trd_specs
+      INTO TABLE p_table
+      WHERE vbeln EQ gv_vbeln.
+
+    IF sy-subrc = 0.
+      CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+        EXPORTING
+          retfield        = p_field
+          dynpprog        = sy-repid
+          dynpnr          = sy-dynnr
+          dynprofield     = p_field
+          window_title    = 'Select Material'
+          value_org       = 'S'
+        TABLES
+          value_tab       = p_table
+        EXCEPTIONS
+          parameter_error = 1
+          no_values_found = 2
+          OTHERS          = 3.
+
+      IF sy-subrc <> 0.
+        MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+                WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+      ENDIF.
+    ENDIF.
+  ELSE.
+    MESSAGE 'SOW is mandatory.' TYPE 'S' DISPLAY LIKE 'E'.
+    EXIT.
+  ENDIF.
+ENDFORM.                                                    " DYN_F4
