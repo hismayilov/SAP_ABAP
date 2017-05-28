@@ -625,6 +625,7 @@ FORM db_update .
                 WHERE vbeln = wa_specs-vbeln
                 AND   atnam = wa_specs-atnam
                 AND   matnr = wa_specs-matnr
+                AND   posnr = wa_specs-posnr
                 AND   lorry_no = wa_specs-lorry_no.
   COMMIT WORK.
 ENDFORM.                    " DB_UPDATE
