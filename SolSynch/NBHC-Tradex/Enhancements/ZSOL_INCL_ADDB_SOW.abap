@@ -1,5 +1,5 @@
 *&---------------------------------------------------------------------*
-*&  Include           ZSOL_INCL_ADDB_SOW for va41/42/43 Add tab B
+*&  Include           ZSOL_INCL_ADDB_SOW
 *&---------------------------------------------------------------------*
 *&  Developed by SaurabhK/Prasad Gurjar
 *&---------------------------------------------------------------------*
@@ -10,6 +10,8 @@
 "------------------------------------------------------------
 ***** Additional Tab B - Header level - sapmv45a - 8309 *****
 "------------------------------------------------------------
+TYPE-POOLS: vrm.
+
 DATA: agfrdat  TYPE sy-datum, " Screen fields
       agtodat  TYPE sy-datum,
       salfrdat TYPE sy-datum,
@@ -20,12 +22,24 @@ DATA: cl1     TYPE tvkbt-vkbur,
       cldesc1 TYPE tvkbt-bezei,
       cldesc2 TYPE tvkbt-bezei.
 
-DATA: clper1 TYPE p DECIMALS 2,
-      clper2 TYPE p DECIMALS 2.
+DATA: clper1   TYPE p LENGTH 3 DECIMALS 2,
+      clper2   TYPE p LENGTH 3 DECIMALS 2,
+      clpertot TYPE p LENGTH 3 DECIMALS 2.
 
-DATA: chqno(10) TYPE c.
+DATA: chqno(100)  TYPE c,
+      inschrg(12) TYPE c,
+      qcchrg(12)  TYPE c,
+      rsqty(12)   TYPE c,
+      pc_chrg(19) TYPE c,
+      wh_chrg(12) TYPE c.
 
 DATA: wa_head TYPE ztb_specs_head.
+
+DATA: gv_clstflg(1) TYPE c,
+      gv_pcflg(1)   TYPE c,
+      gv_visit(1)   TYPE c.
+
+DATA: pc_values TYPE vrm_values WITH HEADER LINE.
 "----------------------------------------------------------
 ***** Additional Tab B - Item level - sapmv45a - 8459 *****
 "----------------------------------------------------------
@@ -64,38 +78,78 @@ DATA: it_chardata TYPE STANDARD TABLE OF ztb_trd_specs,
 *       text
 *----------------------------------------------------------------------*
 MODULE head_pbo OUTPUT.
+
+  IF vbak-auart NE 'YSOW' OR ( sy-tcode <> 'VA41' AND sy-tcode <> 'VA42' AND sy-tcode <> 'VA43' ).
+    LOOP AT SCREEN.
+      IF screen-group1 = 'GRP'.
+        screen-active = 0.
+        MODIFY SCREEN.
+      ENDIF.
+    ENDLOOP.
+  ENDIF.
+
   IF vbak-auart = 'YSOW'.
+
+    REFRESH pc_values[].
+
+    pc_values-key = '1'.
+    pc_values-text = 'Yes'.
+    APPEND pc_values.
+
+    pc_values-key = '2'.
+    pc_values-text = 'No'.
+    APPEND pc_values.
+
+    CALL FUNCTION 'VRM_SET_VALUES'
+      EXPORTING
+        id              = 'PC_CHRG'
+        values          = pc_values[]
+      EXCEPTIONS
+        id_illegal_name = 1
+        OTHERS          = 2.
+    IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+    ENDIF.
+
     IF sy-tcode = 'VA42' OR sy-tcode = 'VA43'.
-      SELECT SINGLE * FROM ztb_specs_head
-        INTO wa_head
-        WHERE vbeln = vbak-vbeln.
+      IF wa_head IS INITIAL.
+        SELECT SINGLE * FROM ztb_specs_head
+          INTO wa_head
+          WHERE vbeln = vbak-vbeln.
 
-      IF wa_head IS NOT INITIAL.
-        chqno    =   wa_head-chqno.
-        agfrdat  =   wa_head-agfrdat.
-        agtodat  =   wa_head-agtodat.
-        salfrdat =   wa_head-salfrdat.
-        saltodat =   wa_head-saltodat.
-        cl1      =   wa_head-cl1.
-        cl2      =   wa_head-cl2.
-        clper1   =   wa_head-clper1.
-        clper2   =   wa_head-clper2.
-      ENDIF.
+        IF wa_head IS NOT INITIAL.
+          chqno    =   wa_head-chqno.
+          agfrdat  =   wa_head-agfrdat.
+          agtodat  =   wa_head-agtodat.
+          salfrdat =   wa_head-salfrdat.
+          saltodat =   wa_head-saltodat.
+          cl1      =   wa_head-cl1.
+          cl2      =   wa_head-cl2.
+          clper1   =   wa_head-clper1.
+          clper2   =   wa_head-clper2.
+          inschrg  =   wa_head-inschrg.
+          qcchrg   =   wa_head-qcchrg.
+          rsqty    =   wa_head-rsqty.
+          pc_chrg  =   wa_head-pc_chrg.
+          wh_chrg  =   wa_head-wh_chrg.
+        ENDIF.
 
-      IF cl1 IS NOT INITIAL.
-        SELECT SINGLE * FROM tvkbt WHERE spras = sy-langu
-                                   AND   vkbur = cl1.
-        cldesc1 = tvkbt-bezei.
-      ELSE.
-        CLEAR: cl1, cldesc1.
-      ENDIF.
+        IF cl1 IS NOT INITIAL.
+          SELECT SINGLE * FROM tvkbt WHERE spras = sy-langu
+                                     AND   vkbur = cl1.
+          cldesc1 = tvkbt-bezei.
+        ELSE.
+          CLEAR: cl1, cldesc1.
+        ENDIF.
 
-      IF cl2 IS NOT INITIAL.
-        SELECT SINGLE * FROM tvkbt WHERE spras = sy-langu
-                                   AND   vkbur = cl2.
-        cldesc2 = tvkbt-bezei.
-      ELSE.
-        CLEAR: cl2, cldesc2.
+        IF cl2 IS NOT INITIAL.
+          SELECT SINGLE * FROM tvkbt WHERE spras = sy-langu
+                                     AND   vkbur = cl2.
+          cldesc2 = tvkbt-bezei.
+        ELSE.
+          CLEAR: cl2, cldesc2.
+        ENDIF.
       ENDIF.
     ENDIF.
 
@@ -119,6 +173,10 @@ ENDMODULE.                 " HEAD_PBO  OUTPUT
 MODULE head_pai INPUT.
   IF vbak-auart = 'YSOW'.
     IF sy-tcode = 'VA41' OR sy-tcode = 'VA42'.
+      CLEAR gv_clstflg.
+
+      gv_visit = 'X'.
+
       IF cl1 IS NOT INITIAL.
         SELECT SINGLE * FROM tvkbt WHERE spras = sy-langu
                                    AND   vkbur = cl1.
@@ -135,6 +193,30 @@ MODULE head_pai INPUT.
         CLEAR: cl2, cldesc2.
       ENDIF.
 
+      IF clper1 IS NOT INITIAL AND clper2 IS INITIAL.
+        clper2 = '100.00' - clper1.
+      ELSEIF clper1 IS INITIAL AND clper2 IS NOT INITIAL.
+        clper1 = '100.00' - clper2.
+      ENDIF.
+
+      IF clper1 IS NOT INITIAL OR clper2 IS NOT INITIAL.
+        clpertot = ( clper1 + clper2 ).
+
+        IF clpertot <> '100.00'.
+          MESSAGE 'Cluster total is not equal to 100.' TYPE 'W' DISPLAY LIKE 'E'.
+          gv_clstflg = 'X'.
+        ELSE.
+          CLEAR gv_clstflg.
+        ENDIF.
+      ENDIF.
+
+      IF pc_chrg IS INITIAL.
+        MESSAGE 'No selection for procurement charges' TYPE 'W' DISPLAY LIKE 'E'.
+        gv_pcflg = 'X'.
+      ELSE.
+        CLEAR gv_pcflg.
+      ENDIF.
+
       wa_head-chqno     = chqno.
       wa_head-agfrdat   = agfrdat.
       wa_head-agtodat   = agtodat.
@@ -144,9 +226,17 @@ MODULE head_pai INPUT.
       wa_head-cl2       = cl2.
       wa_head-clper1    = clper1.
       wa_head-clper2    = clper2.
+      wa_head-inschrg   = inschrg.
+      wa_head-qcchrg    = qcchrg.
+      wa_head-rsqty     = rsqty.
+      wa_head-pc_chrg   = pc_chrg.
+      wa_head-wh_chrg   = wh_chrg.
     ENDIF.
 
     EXPORT wa_head TO MEMORY ID 'HEAD'.
+    EXPORT gv_clstflg TO MEMORY ID 'CLFLG'.
+    EXPORT gv_pcflg TO MEMORY ID 'PCFLG'.
+    EXPORT gv_visit TO MEMORY ID 'VSTFLG'.
   ENDIF.
 ENDMODULE.                 " HEAD_PAI  INPUT
 "-----------------------------------------------------------
@@ -200,6 +290,7 @@ MODULE get_data OUTPUT.
     ELSEIF sy-tcode = 'VA42'.
 
       REFRESH it_chardata.
+
       SELECT *
         FROM ztb_trd_specs
         INTO CORRESPONDING FIELDS OF TABLE it_final_modify
@@ -207,8 +298,11 @@ MODULE get_data OUTPUT.
         AND   matnr EQ vbap-matnr
         AND   posnr EQ vbap-posnr.
 
-      DESCRIBE TABLE it_final_modify LINES v_line.
-      tbc_8459-lines = v_line.
+      IF sy-subrc = 0.
+        DELETE ADJACENT DUPLICATES FROM it_final_modify COMPARING atnam.
+        DESCRIBE TABLE it_final_modify LINES v_line.
+        tbc_8459-lines = v_line.
+      ENDIF.
 
       LOOP AT it_final INTO wa_final WHERE matnr EQ vbap-matnr AND posnr EQ vbap-posnr.
         MOVE-CORRESPONDING wa_final TO wa_chardata.
@@ -217,11 +311,24 @@ MODULE get_data OUTPUT.
       ENDLOOP.
 
       IF it_chardata[] IS INITIAL.
-        LOOP AT it_final_modify INTO wa_final_modify.
-          MOVE-CORRESPONDING wa_final_modify TO wa_chardata.
-          APPEND wa_chardata TO it_chardata.
-          CLEAR : wa_final_modify,wa_chardata.
-        ENDLOOP.
+        IF it_final_modify[] IS NOT INITIAL.
+          LOOP AT it_final_modify INTO wa_final_modify.
+            MOVE-CORRESPONDING wa_final_modify TO wa_chardata.
+            APPEND wa_chardata TO it_chardata.
+            CLEAR : wa_final_modify,wa_chardata.
+          ENDLOOP.
+        ELSE.
+          PERFORM get_char.
+          DESCRIBE TABLE it_characteristics LINES v_line.
+          tbc_8459-lines = v_line.
+          LOOP AT it_characteristics INTO wa_characteristics.
+            wa_chardata-atnam    = wa_characteristics-name_char.
+            wa_chardata-atbez    = wa_characteristics-descr_char.
+            wa_chardata-meins    = wa_characteristics-unit.
+            wa_chardata-matnr    = vbap-matnr.
+            APPEND wa_chardata TO it_chardata.
+          ENDLOOP.
+        ENDIF.
       ENDIF.
 
     ELSEIF sy-tcode = 'VA43'.
@@ -235,15 +342,30 @@ MODULE get_data OUTPUT.
           AND   matnr EQ vbap-matnr
           AND   posnr EQ vbap-posnr.
 
-      DESCRIBE TABLE it_final_modify LINES v_line.
-      tbc_8459-lines = v_line.
+      IF sy-subrc = 0.
+        DELETE ADJACENT DUPLICATES FROM it_final_modify COMPARING atnam.
+        DESCRIBE TABLE it_final_modify LINES v_line.
+        tbc_8459-lines = v_line.
+      ENDIF.
 
-      LOOP AT it_final_modify INTO wa_final_modify.
-        MOVE-CORRESPONDING wa_final_modify TO wa_chardata.
-        APPEND wa_chardata TO it_chardata.
-        CLEAR : wa_final_modify,wa_chardata.
-      ENDLOOP.
-
+      IF it_final_modify[] IS NOT INITIAL.
+        LOOP AT it_final_modify INTO wa_final_modify.
+          MOVE-CORRESPONDING wa_final_modify TO wa_chardata.
+          APPEND wa_chardata TO it_chardata.
+          CLEAR : wa_final_modify,wa_chardata.
+        ENDLOOP.
+      ELSE.
+        PERFORM get_char.
+        DESCRIBE TABLE it_characteristics LINES v_line.
+        tbc_8459-lines = v_line.
+        LOOP AT it_characteristics INTO wa_characteristics.
+          wa_chardata-atnam    = wa_characteristics-name_char.
+          wa_chardata-atbez    = wa_characteristics-descr_char.
+          wa_chardata-meins    = wa_characteristics-unit.
+          wa_chardata-matnr    = vbap-matnr.
+          APPEND wa_chardata TO it_chardata.
+        ENDLOOP.
+      ENDIF.
     ENDIF.
   ENDIF.
 ENDMODULE.                 " GET_DATA  OUTPUT
@@ -268,7 +390,7 @@ MODULE tbc_8459_get_lines OUTPUT.
     ENDLOOP.
   ENDIF.
 
-  IF vbak-auart NE 'YSOW'.
+  IF vbak-auart NE 'YSOW' OR ( sy-tcode <> 'VA41' AND sy-tcode <> 'VA42' AND sy-tcode <> 'VA43' ).
     LOOP AT SCREEN.
       tbc_8459-invisible = 1.
       MODIFY SCREEN.
