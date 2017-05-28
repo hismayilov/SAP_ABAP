@@ -1,7 +1,6 @@
 METHOD if_ex_me_process_po_cust~process_account.
 *  break ftabap.
 *** Get Qty in SOW and check if total PO qnty exceeds it
-
   IF sy-tcode = 'ME21N' OR sy-tcode = 'ME22N'.
 
     TYPES: BEGIN OF ty_valtab,
@@ -14,7 +13,10 @@ METHOD if_ex_me_process_po_cust~process_account.
           v_qty TYPE mepoitem-menge,
           v_so TYPE mepoaccounting-vbeln,
           v_so_line TYPE mepoaccounting-vbelp,
+          v_ebeln   TYPE mepoitem-ebeln,
+          v_ebelp   TYPE mepoitem-ebelp,
           wa_vbap TYPE vbap,
+          wa_vbak TYPE vbak,
           v_sow_qty TYPE vbap-kwmeng,
           v_msg TYPE string,
           it_fields TYPE STANDARD TABLE OF help_value,  " for popup table display
@@ -34,11 +36,13 @@ METHOD if_ex_me_process_po_cust~process_account.
       RECEIVING
         re_data = re_data.
 
+    v_ebeln = re_itemdet-ebeln.
+    v_ebelp = re_itemdet-ebelp.
     v_qty = re_itemdet-menge.
     v_so = re_data-vbeln.
     v_so_line = re_data-vbelp.
 
-    "added by prasad
+    "added by Saurabh
     DATA : v_sumqty TYPE mepoitem-menge,
            v_difqty TYPE string.  "mepoitem-menge.
 
@@ -50,7 +54,12 @@ METHOD if_ex_me_process_po_cust~process_account.
         WHERE vbeln = v_so
         AND posnr = v_so_line.
 
-      IF wa_vbap IS NOT INITIAL AND re_itemdet-matnr IS NOT INITIAL.
+      SELECT SINGLE *
+        FROM vbak
+        INTO wa_vbak
+        WHERE vbeln = v_so.
+
+      IF wa_vbap IS NOT INITIAL AND wa_vbap IS NOT INITIAL AND re_itemdet-matnr IS NOT INITIAL.
         IF wa_vbap-matnr NE re_itemdet-matnr.
           CONCATENATE 'Material does not match with' v_so '/' v_so_line '-' 'Expected:' wa_vbap-matnr INTO v_msg SEPARATED BY space.
           MESSAGE v_msg TYPE 'E'.
@@ -65,6 +74,9 @@ METHOD if_ex_me_process_po_cust~process_account.
         APPEND wa_valtab TO it_valtab.
 
         MOVE wa_vbap-posnr TO wa_valtab-data.
+        APPEND wa_valtab TO it_valtab.
+
+        MOVE wa_vbak-kunnr TO wa_valtab-data.
         APPEND wa_valtab TO it_valtab.
 
         MOVE wa_vbap-matnr TO wa_valtab-data.
@@ -97,6 +109,10 @@ METHOD if_ex_me_process_po_cust~process_account.
 
         wa_fields-tabname = 'VBAP'.
         wa_fields-fieldname = 'POSNR'.
+        APPEND wa_fields TO it_fields.
+
+        wa_fields-tabname = 'VBAK'.
+        wa_fields-fieldname = 'KUNNR'.
         APPEND wa_fields TO it_fields.
 
         wa_fields-tabname = 'VBAP'.
@@ -146,7 +162,9 @@ METHOD if_ex_me_process_po_cust~process_account.
         FROM ekkn
         INTO v_sumqty
         WHERE vbeln = v_so
-        AND   vbelp = v_so_line.
+        AND   vbelp = v_so_line
+        AND   ( ebeln NE v_ebeln
+        AND   ebelp NE v_ebelp ).
 
       IF v_qty IS NOT INITIAL.
         v_qty = v_qty + v_sumqty.
@@ -160,5 +178,8 @@ METHOD if_ex_me_process_po_cust~process_account.
       ENDIF.
 
     ENDIF.
+
+    EXPORT v_so FROM v_so TO MEMORY ID 'VSO'.
+
   ENDIF.
 ENDMETHOD.
