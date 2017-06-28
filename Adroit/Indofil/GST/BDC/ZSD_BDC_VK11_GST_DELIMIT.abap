@@ -242,19 +242,6 @@ FORM bdc .
       AND aland = wa_tab-aland
       AND werks = wa_tab-werks.
 
-      IF indx >= 10.
-        PERFORM bdc_dynpro      USING 'SAPMV13A' '1357'.
-
-        CLEAR: fname.
-        MOVE 11 TO indx.
-        SHIFT indx LEFT DELETING LEADING space.
-        CONCATENATE 'RV13A-DATBI(' indx  ')' INTO fname.
-        PERFORM bdc_field       USING 'BDC_CURSOR'
-                                      fname."'RV13A-DATBI(01)'.
-        PERFORM bdc_field       USING 'BDC_OKCODE'
-                                      '=P+'.
-      ENDIF.
-
       PERFORM bdc_dynpro      USING 'SAPMV13A' '1357'.
 
       CLEAR: fname.
@@ -295,13 +282,13 @@ FORM bdc .
       PERFORM bdc_field       USING fname"'RV13A-DATBI(01)'
                                     wa_temp-datbi."'30.06.2017'.
 
-      IF indx >= 10.
-        CLEAR indx.
-        MOVE 2 TO indx.
-      ENDIF.
-
       ADD 1 TO indx.
+
+      IF indx > 3.
+        MOVE 3 TO indx.
+      ENDIF.
       SHIFT indx LEFT DELETING LEADING space.
+
       CLEAR wa_temp.
     ENDLOOP.
 
@@ -370,19 +357,6 @@ FORM bdc .
       WHERE kschl = wa_tab_salorg-kschl
       AND vkorgau = wa_tab_salorg-vkorgau.
 
-      IF indx >= 10.
-        PERFORM bdc_dynpro      USING 'SAPMV13A' '1056'.
-
-        CLEAR: fname.
-        MOVE 11 TO indx.
-        SHIFT indx LEFT DELETING LEADING space.
-        CONCATENATE 'RV13A-DATBI(' indx  ')' INTO fname.
-        PERFORM bdc_field       USING 'BDC_CURSOR'
-                                      fname."'RV13A-DATBI(01)'.
-        PERFORM bdc_field       USING 'BDC_OKCODE'
-                                      '=P+'.
-      ENDIF.
-
       PERFORM bdc_dynpro      USING 'SAPMV13A' '1056'.
 
       CLEAR: fname.
@@ -423,13 +397,13 @@ FORM bdc .
       PERFORM bdc_field       USING fname"'RV13A-DATBI(01)'
                                     wa_temp_salorg-datbi."'30.06.2017'.
 
-      IF indx >= 10.
-        CLEAR indx.
-        MOVE 2 TO indx.
-      ENDIF.
-
       ADD 1 TO indx.
+
+      IF indx > 3.
+        MOVE 3 TO indx.
+      ENDIF.
       SHIFT indx LEFT DELETING LEADING space.
+
       CLEAR wa_temp_salorg.
     ENDLOOP.
 
