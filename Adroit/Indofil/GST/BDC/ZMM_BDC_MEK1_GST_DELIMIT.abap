@@ -151,23 +151,6 @@ FORM bdc .
 
     LOOP AT it_temp INTO wa_temp WHERE kschl = wa_tab-kschl.
 
-      IF indx >= 10.
-        PERFORM bdc_dynpro      USING 'SAPMV13A' '1518'.
-
-        CLEAR: fname.
-        MOVE 3 TO indx.
-        SHIFT indx LEFT DELETING LEADING space.
-        CONCATENATE 'RV13A-DATBI(' indx  ')' INTO fname.
-        PERFORM bdc_field       USING 'BDC_CURSOR'
-                                      fname."'RV13A-DATBI(01)'.
-        PERFORM bdc_field       USING 'BDC_OKCODE'
-                                      '=P+'.
-
-        PERFORM bdc_dynpro      USING 'SAPMV13A' '1518'.
-        PERFORM bdc_field       USING 'BDC_OKCODE'
-                                      '=NEWP'.
-      ENDIF.
-
       PERFORM bdc_dynpro      USING 'SAPMV13A' '1518'.
 
       CLEAR: fname.
@@ -216,12 +199,12 @@ FORM bdc .
 
 
       ADD 1 TO indx.
+
+      IF indx > 3.
+        MOVE 3 TO indx.
+      ENDIF.
       SHIFT indx LEFT DELETING LEADING space.
 
-*      IF indx > 3.
-*        MOVE 3 TO indx.
-*        SHIFT indx LEFT DELETING LEADING space.
-*      ENDIF.
       CLEAR wa_temp.
     ENDLOOP.
 
