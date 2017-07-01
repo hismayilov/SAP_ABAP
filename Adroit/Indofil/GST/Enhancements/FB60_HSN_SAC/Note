@@ -1,0 +1,5 @@
+1. Make HSN_SAC Code mandatory
+2. Move HSN Field nxt to tax code
+3. Fill HSN Field by default based on GST Partner value from z table if there's only one corresponding hsn code for entered gst partner.
+4. Donot show any value in HSN if more than on HSN code is found in ztable for entered gst partner.
+5. In any case show f4 help for HSN Field based on values in 2 ztables
