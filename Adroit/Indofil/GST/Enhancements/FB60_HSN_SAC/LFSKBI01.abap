@@ -41,11 +41,13 @@ MODULE VALIDATE_INDIA_GST_FIELDS INPUT.
         ENDIF.
 *{   INSERT         IRDK927968                                        1
 * ---- Make HSN/SAC code mandatory ---- *
-        IF sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65' OR sy-tcode EQ 'FB70' OR sy-tcode EQ 'FB75'.
-          IF sy-ucomm EQ 'BS' OR sy-ucomm EQ 'BU' OR sy-ucomm EQ 'BP'.
-            IF acgl_item-hkont IS NOT INITIAL AND acgl_item-bschl IS NOT INITIAL AND acgl_item-koart IS NOT INITIAL.
-              IF acgl_item-hsn_sac IS INITIAL.
-                MESSAGE 'HSN/SAC code is mandatory' TYPE 'E'.
+        IF bkpf-budat GT '20170630'.
+          IF sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65' OR sy-tcode EQ 'FB70' OR sy-tcode EQ 'FB75'.
+            IF sy-ucomm EQ 'BS' OR sy-ucomm EQ 'BU' OR sy-ucomm EQ 'BP'.
+              IF acgl_item-hkont IS NOT INITIAL AND acgl_item-bschl IS NOT INITIAL AND acgl_item-koart IS NOT INITIAL.
+                IF acgl_item-hsn_sac IS INITIAL.
+                  MESSAGE 'HSN/SAC code is mandatory' TYPE 'E'.
+                ENDIF.
               ENDIF.
             ENDIF.
           ENDIF.
