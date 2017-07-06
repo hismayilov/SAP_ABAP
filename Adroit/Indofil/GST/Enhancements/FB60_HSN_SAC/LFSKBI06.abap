@@ -29,18 +29,23 @@ IF ( sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65' OR sy-tcode EQ 'FB70' OR sy-tcode 
         wa_shret TYPE ddshretval.
 
   DATA: gstpart TYPE invfo-gst_part,
+        budat   TYPE invfo-budat,
         title(100) TYPE c.
 
-  FIELD-SYMBOLS: <gstpart> TYPE invfo-gst_part.
+  FIELD-SYMBOLS: <gstpart> TYPE invfo-gst_part,
+                 <budat>   TYPE invfo-budat.
 
-  CLEAR gstpart.
+  CLEAR: gstpart, budat.
   REFRESH: it_vsac, it_sac, it_hsnhlp, it_shret.
 
+  UNASSIGN: <budat>, <gstpart>.
+  ASSIGN ('(SAPLJ_1IG_VENDOR_SUBSCR)INVFO-BUDAT') TO <budat> .
   ASSIGN ('(SAPLJ_1IG_VENDOR_SUBSCR)INVFO-GST_PART') TO <gstpart> .
 
-  IF <gstpart> IS ASSIGNED.
+  IF <gstpart> IS ASSIGNED AND <budat> IS ASSIGNED.
+      budat   = <budat>.
       gstpart = <gstpart>.
-    IF gstpart IS NOT INITIAL.
+    IF gstpart IS NOT INITIAL AND budat GT '20170630'.
       SELECT *
         FROM zgst_vsac
         INTO TABLE it_vsac
