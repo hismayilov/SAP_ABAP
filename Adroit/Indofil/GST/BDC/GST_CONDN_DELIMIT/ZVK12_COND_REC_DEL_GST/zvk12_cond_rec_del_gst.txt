@@ -1,0 +1,148 @@
+REPORT sy-repid
+       NO STANDARD PAGE HEADING LINE-SIZE 255.
+
+INCLUDE bdcrecx1.
+
+TYPES: BEGIN OF ty_tab_372,
+         kschl(20) TYPE c,
+         vkorg(20) TYPE c,
+         vgbel(20) TYPE c,
+         vgpos(20) TYPE c,
+       END OF ty_tab_372.
+
+DATA: it_a372    TYPE TABLE OF a372,
+      wa_a372    TYPE a372,
+
+      it_tab_372 TYPE TABLE OF ty_tab_372,
+      wa_tab_372 TYPE ty_tab_372,
+
+      lines      TYPE i,
+      per        TYPE p,
+      perc(3)    TYPE c,
+      msg        TYPE string,
+
+*      it_konp TYPE TABLE OF konp,
+*      wa_konp TYPE konp,
+
+      kschl      TYPE konv-kschl.
+
+*SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE text.
+*SELECT-OPTIONS: s_kschl FOR kschl.
+*SELECTION-SCREEN END OF BLOCK b1.
+
+INITIALIZATION.
+*text = 'Set deletion indicator for records in VK12 Access Seq.- Sales Org/Ref Doc/Ref Item'.
+
+START-OF-SELECTION.
+
+  SELECT *
+    FROM a372
+    INTO TABLE it_a372
+    WHERE kschl IN ( 'JEAP',
+                     'JEXP',
+                     'JCED',
+                     'JESP',
+                     'JCEP',
+                     'ZCEP' )
+    AND   kappl EQ 'V'
+    AND   datbi > '20170630'.
+
+*  IF it_a372 IS NOT INITIAL.
+*    SELECT *
+*      FROM konp
+*      INTO TABLE it_konp
+*      FOR ALL ENTRIES IN it_a372
+*      WHERE knumh = it_a372-knumh
+*      AND   loevm_ko NE 'X'
+*      AND   kappl = it_a372-kappl
+*      AND   kschl = it_a372-kschl.
+*
+*    IF it_konp[] IS NOT INITIAL.
+*      SORT it_a372 ASCENDING BY knumh.
+*      SORT it_konp ASCENDING BY knumh.
+*      LOOP AT it_a372 INTO wa_a372.
+*        READ TABLE it_konp INTO wa_konp WITH KEY knumh = wa_a372-knumh.
+*        IF sy-subrc <> 0.
+*          DELETE it_a372.
+*        ENDIF.
+*        CLEAR: wa_konp, wa_a372.
+*      ENDLOOP.
+*    ELSE.
+*      REFRESH it_a372[].
+*    ENDIF.
+
+  WRITE:/ 'Selection stage complete'.
+
+  IF it_a372[] IS NOT INITIAL.
+    LOOP AT it_a372 INTO wa_a372.
+      MOVE-CORRESPONDING wa_a372 TO wa_tab_372.
+      APPEND wa_tab_372 TO it_tab_372.
+      CLEAR: wa_tab_372, wa_a372.
+    ENDLOOP.
+  ENDIF.
+
+  WRITE:/ 'Processing stage complete'.
+
+  IF it_tab_372[] IS NOT INITIAL.
+    DESCRIBE TABLE it_tab_372 LINES lines.
+    WRITE: 'Start BDC Loop'.
+    LOOP AT it_tab_372 INTO wa_tab_372.
+      CLEAR: per, perc.
+      IF ( sy-tabix MOD 200 ) EQ 0.
+        per = ( sy-tabix / lines ) * 100.
+        MOVE per TO perc.
+        CLEAR msg.
+        CONCATENATE 'Performing BDC' perc '% completed' INTO msg SEPARATED BY space.
+        CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR'
+          EXPORTING
+            percentage = perc
+            text       = msg.
+      ENDIF.
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_372-kschl."'JCED'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+
+      PERFORM bdc_dynpro      USING 'RV13A372' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'F003-LOW'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_372-vkorg."'1000'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_372-vgbel."'0080000059'.
+      PERFORM bdc_field       USING 'F003-LOW'
+                                    wa_tab_372-vgpos.       "'000012'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    '03.07.2017'.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1372'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'KOMG-VGPOS(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ENTF'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    'X'.
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1372'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'KOMG-VGPOS(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+      CLEAR: wa_tab_372.
+    ENDLOOP.
+  ENDIF.

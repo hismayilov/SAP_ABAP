@@ -1,0 +1,108 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZINC_VK11_CONDN_FETCH
+*&---------------------------------------------------------------------*
+
+FORM a056_fetch .
+  SELECT *
+    FROM a056
+    INTO TABLE it_a056
+    WHERE kappl EQ 'V'
+    AND   kschl EQ 'ZACD'
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a110_fetch .
+  SELECT *
+    FROM a110
+    INTO TABLE it_a110
+    WHERE kappl EQ 'V'
+    AND   kschl EQ 'ZTRP'
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a357_fetch .
+  SELECT *
+    FROM a357
+    INTO TABLE it_a357
+    WHERE kappl EQ 'V'
+    AND   kschl IN ('JEAP', 'JEXP', 'JEXT', 'JCET', 'ZCET', 'UTXJ', 'JCED', 'JESP', 'JCEP', 'ZCEP')
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a358_fetch .
+  SELECT *
+    FROM a358
+    INTO TABLE it_a358
+    WHERE kappl EQ 'V'
+    AND   kschl IN ('JEXP', 'JEXT', 'JCET', 'ZCET', 'JCEP', 'ZCEP')
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a367_fetch .
+  SELECT *
+    FROM a367
+    INTO TABLE it_a367
+    WHERE kappl EQ 'V'
+    AND   kschl IN ('UTX1', 'ZAVT')
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a368_fetch .
+  SELECT *
+    FROM a368
+    INTO TABLE it_a368
+    WHERE kappl EQ 'V'
+    AND   kschl IN ('UTX1', 'ZAVT')
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a372_fetch .
+  SELECT *
+    FROM a372
+    INTO TABLE it_a372
+    WHERE kappl EQ 'V'
+    AND   kschl IN ( 'JEAP',
+                     'JEXP',
+                     'JCED',
+                     'JESP',
+                     'JCEP',
+                     'ZCEP' )
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a602_fetch .
+  SELECT *
+    FROM a602
+    INTO TABLE it_a602
+    WHERE kappl EQ 'V'
+    AND   kschl IN ('JCST', 'ZCST')
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a604_fetch .
+  SELECT *
+    FROM a604
+    INTO TABLE it_a604
+    WHERE kappl EQ 'V'
+    AND   kschl EQ 'JCST'
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.
+
+FORM a902_fetch .
+  SELECT *
+    FROM a902
+    INTO TABLE it_a902
+    WHERE kappl EQ 'V'
+    AND   kschl EQ 'ZKF2'
+    AND   datbi > '20170630'
+    AND   datab <= sy-datum.
+ENDFORM.

@@ -1,0 +1,102 @@
+* Author - Saurabh Khare (Adroit Infotech Pvt. Ltd) *
+* Date - Friday, June 30, 2017 00:48:52 *
+
+REPORT zmek1_condn_delimit
+       NO STANDARD PAGE HEADING LINE-SIZE 255.
+
+* Include *
+INCLUDE bdcrecx1.
+INCLUDE zinc_mek1_condn_dd.
+INCLUDE zinc_mek1_condn_fetch.
+INCLUDE zinc_mek1_condn_process.
+INCLUDE zinc_mek1_condn_bdc.
+
+INITIALIZATION.
+  PERFORM popup_notice.
+  PERFORM date_convert.
+
+START-OF-SELECTION.
+
+  PERFORM get_data.
+  PERFORM process_data.
+  IF it_tab_445[] IS INITIAL
+*    AND it_tab_505[] IS INITIAL
+*    AND it_tab_507[] IS INITIAL
+    AND it_tab_516[] IS INITIAL
+    AND it_tab_518[] IS INITIAL
+    AND it_tab_540[] IS INITIAL.
+*    AND it_tab_541[] IS INITIAL.
+    MESSAGE 'No data found' TYPE 'S' DISPLAY LIKE 'E'.
+    EXIT.
+  ELSE.
+    PERFORM bdc.
+  ENDIF.
+
+FORM get_data.
+  PERFORM progress_display USING 'Retrieving Condition Records Data' '50'.
+  PERFORM a445_fetch. " Material
+*  PERFORM a505_fetch. " Plant/Vendor/Material
+*  PERFORM a507_fetch. " Vendor/Plant
+  PERFORM a516_fetch. " Plant/Material
+  PERFORM a518_fetch. " Suppl.Plnt/Material
+  PERFORM a540_fetch. " Suppl.Plnt/Material/Plant
+*  PERFORM a541_fetch. " Suppl.Plnt/Plant
+ENDFORM.
+
+FORM process_data.
+  PERFORM progress_display USING 'Processing Condition Records Data' '50'.
+  PERFORM a445_process.
+*  PERFORM a505_process.
+*  PERFORM a507_process.
+  PERFORM a516_process.
+  PERFORM a518_process.
+  PERFORM a540_process.
+*  PERFORM a541_process.
+ENDFORM.
+
+FORM bdc.
+  PERFORM progress_display USING 'Delimiting Condition Records' '50'.
+  PERFORM a445_bdc.
+*  PERFORM a505_bdc.
+*  PERFORM a507_bdc.
+  PERFORM a516_bdc.
+  PERFORM a518_bdc.
+  PERFORM a540_bdc.
+*  PERFORM a541_bdc.
+  PERFORM progress_display USING 'Delimiting Condition Records' '50'.
+ENDFORM.
+
+FORM popup_notice .
+  CALL FUNCTION 'POPUP_TO_INFORM'
+    EXPORTING
+      titel = 'Pleae Note:'
+      txt1  = 'This program will delimit(30.06.2017) the condition records of all valid'
+      txt2  = 'access sequences of the following condition types via MEK1:'
+      txt3  = 'ZSTR'.
+*      txt3  = 'J1CV JADC JCV1 JCE1 JCE2 JECV JOCM STRD ZACD ZETX ZEX1 ZEX2 ZEX3 ZLBT'.
+ENDFORM.
+
+FORM progress_display  USING    VALUE(p_txt)
+                                VALUE(p_per).
+
+  CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR'
+   EXPORTING
+     PERCENTAGE       = p_per
+     TEXT             = p_txt.
+
+ENDFORM.
+
+FORM date_convert .
+  CALL FUNCTION 'CONVERT_DATE_TO_EXTERNAL'
+    EXPORTING
+      date_internal            = sy-datum
+    IMPORTING
+      date_external            = v_datum
+    EXCEPTIONS
+      date_internal_is_invalid = 1
+      OTHERS                   = 2.
+  IF sy-subrc <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+ENDFORM.

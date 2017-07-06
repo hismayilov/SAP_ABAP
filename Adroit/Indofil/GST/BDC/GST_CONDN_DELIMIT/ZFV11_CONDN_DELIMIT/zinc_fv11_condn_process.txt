@@ -1,0 +1,53 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZINC_FV11_CONDN_PROCESS
+*&---------------------------------------------------------------------*
+
+FORM a359_process .
+  IF it_a359[] IS NOT INITIAL.
+    LOOP AT it_a359 INTO wa_a359.
+      MOVE-CORRESPONDING wa_a359 TO wa_tab_359.
+      APPEND wa_tab_359 TO it_tab_359.
+      CLEAR: wa_tab_359, wa_a359.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a504_process .
+  IF it_a504[] IS NOT INITIAL.
+    LOOP AT it_a504 INTO wa_a504.
+      MOVE-CORRESPONDING wa_a504 TO wa_tab_504.
+      APPEND wa_tab_504 TO it_tab_504.
+      CLEAR: wa_tab_504, wa_a504.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a515_process .
+  IF it_a515[] IS NOT INITIAL.
+    LOOP AT it_a515 INTO wa_a515.
+      MOVE-CORRESPONDING wa_a515 TO wa_tab_515.
+      APPEND wa_tab_515 TO it_tab_515.
+      CLEAR: wa_tab_515, wa_a515.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a519_process .
+  IF it_a519[] IS NOT INITIAL.
+    LOOP AT it_a519 INTO wa_a519.
+      MOVE-CORRESPONDING wa_a519 TO wa_tab_519.
+      APPEND wa_tab_519 TO it_tab_519.
+      CLEAR: wa_tab_519, wa_a519.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a536_process .
+  IF it_a536[] IS NOT INITIAL.
+    LOOP AT it_a536 INTO wa_a536.
+      MOVE-CORRESPONDING wa_a536 TO wa_tab_536.
+      APPEND wa_tab_536 TO it_tab_536.
+      CLEAR: wa_tab_536, wa_a536.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.

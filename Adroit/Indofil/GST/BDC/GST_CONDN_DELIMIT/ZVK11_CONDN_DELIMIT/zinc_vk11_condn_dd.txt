@@ -1,0 +1,171 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZINC_VK11_CONDN_DD
+*&---------------------------------------------------------------------*
+
+* Data Declaration *
+* Types *
+TYPES: BEGIN OF ty_tab_056,
+         kschl(20)   TYPE c,
+         vkorgau(20) TYPE c,
+         werks(20)   TYPE c,
+         datab(20)   TYPE c,
+         datbi(20)   TYPE c,
+       END OF ty_tab_056,
+
+       BEGIN OF ty_tab_110,
+         kschl(20) TYPE c,
+         vkorg(20) TYPE c,
+         lland(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_110,
+
+       BEGIN OF ty_tab_357,
+         kschl(20) TYPE c,
+         aland(20) TYPE c,
+         werks(20) TYPE c,
+         steuc(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_357,
+
+       BEGIN OF ty_tab_358,
+         kschl(20) TYPE c,
+         aland(20) TYPE c,
+         werks(20) TYPE c,
+         steuc(20) TYPE c,
+         matnr(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_358,
+
+       BEGIN OF ty_tab_367,
+         kschl(20) TYPE c,
+         aland(20) TYPE c,
+         werks(20) TYPE c,
+         regio(20) TYPE c,
+         matnr(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_367,
+
+       BEGIN OF ty_tab_368,
+         kschl(20) TYPE c,
+         aland(20) TYPE c,
+         wkreg(20) TYPE c,
+         regio(20) TYPE c,
+         taxk1(20) TYPE c,
+         taxm1(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_368,
+
+       BEGIN OF ty_tab_372,
+         kschl(20) TYPE c,
+         vkorg(20) TYPE c,
+         vgbel(20) TYPE c,
+         vgpos(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_372,
+
+       BEGIN OF ty_tab_602,
+         kschl(20) TYPE c,
+         aland(20) TYPE c,
+         wkreg(20) TYPE c,
+         regio(20) TYPE c,
+         taxk2(20) TYPE c,
+         taxm2(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_602,
+
+       BEGIN OF ty_tab_604,
+         kschl(20) TYPE c,
+         aland(20) TYPE c,
+         wkreg(20) TYPE c,
+         regio(20) TYPE c,
+         matnr(20) TYPE c,
+         taxk1(20) TYPE c,
+         taxm1(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_604,
+
+       BEGIN OF ty_tab_902,
+         kschl(20) TYPE c,
+         vkorg(20) TYPE c,
+         vtweg(20) TYPE c,
+         spart(20) TYPE c,
+         werks(20) TYPE c,
+         vkgrp(20) TYPE c,
+         kondm(20) TYPE c,
+         kmein(20) TYPE c,
+         datab(20) TYPE c,
+         datbi(20) TYPE c,
+       END OF ty_tab_902.
+
+* Tables *
+DATA: it_tab_056 TYPE TABLE OF ty_tab_056,
+      wa_tab_056 TYPE ty_tab_056,
+
+      it_a056    TYPE TABLE OF a056,
+      wa_a056    TYPE a056,
+
+      it_tab_110 TYPE TABLE OF ty_tab_110,
+      wa_tab_110 TYPE ty_tab_110,
+
+      it_a110    TYPE TABLE OF a110,
+      wa_a110    TYPE a110,
+
+      it_tab_357 TYPE TABLE OF ty_tab_357,
+      wa_tab_357 TYPE ty_tab_357,
+
+      it_a357    TYPE TABLE OF a357,
+      wa_a357    TYPE a357,
+
+      it_tab_358 TYPE TABLE OF ty_tab_358,
+      wa_tab_358 TYPE ty_tab_358,
+
+      it_a358    TYPE TABLE OF a358,
+      wa_a358    TYPE a358,
+
+      it_tab_367 TYPE TABLE OF ty_tab_367,
+      wa_tab_367 TYPE ty_tab_367,
+
+      it_a367    TYPE TABLE OF a367,
+      wa_a367    TYPE a367,
+
+      it_tab_368 TYPE TABLE OF ty_tab_368,
+      wa_tab_368 TYPE ty_tab_368,
+
+      it_a368    TYPE TABLE OF a368,
+      wa_a368    TYPE a368,
+
+      it_tab_372 TYPE TABLE OF ty_tab_372,
+      wa_tab_372 TYPE ty_tab_372,
+
+      it_a372    TYPE TABLE OF a372,
+      wa_a372    TYPE a372,
+
+      it_tab_602 TYPE TABLE OF ty_tab_602,
+      wa_tab_602 TYPE ty_tab_602,
+
+      it_a602    TYPE TABLE OF a602,
+      wa_a602    TYPE a602,
+
+      it_tab_604 TYPE TABLE OF ty_tab_604,
+      wa_tab_604 TYPE ty_tab_604,
+
+      it_a604    TYPE TABLE OF a604,
+      wa_a604    TYPE a604,
+
+      it_tab_902 TYPE TABLE OF ty_tab_902,
+      wa_tab_902 TYPE ty_tab_902,
+
+      it_a902    TYPE TABLE OF a902,
+      wa_a902    TYPE a902.
+
+* Variables *
+DATA: indx(4)     TYPE c,
+      v_datum(10) TYPE c.

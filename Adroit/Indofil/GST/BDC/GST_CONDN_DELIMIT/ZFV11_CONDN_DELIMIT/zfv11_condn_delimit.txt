@@ -1,0 +1,93 @@
+* Author - Saurabh Khare (Adroit Infotech Pvt. Ltd) *
+* Date - Thursday, June 29, 2017 20:08:00 *
+
+REPORT zfv11_condn_delimit
+       NO STANDARD PAGE HEADING LINE-SIZE 255.
+
+* Include *
+INCLUDE bdcrecx1.
+INCLUDE zinc_fv11_condn_dd.
+INCLUDE zinc_fv11_condn_fetch.
+INCLUDE zinc_fv11_condn_process.
+INCLUDE zinc_fv11_condn_bdc.
+
+INITIALIZATION.
+  PERFORM popup_notice.
+  PERFORM date_convert.
+
+START-OF-SELECTION.
+
+  PERFORM get_data.
+  PERFORM process_data.
+  IF it_tab_359[] IS INITIAL
+    AND it_tab_504[] IS INITIAL
+    AND it_tab_515[] IS INITIAL
+    AND it_tab_519[] IS INITIAL
+    AND it_tab_536[] IS INITIAL.
+    MESSAGE 'No data found' TYPE 'S' DISPLAY LIKE 'E'.
+    EXIT.
+  ELSE.
+    PERFORM bdc.
+  ENDIF.
+
+FORM get_data .
+  PERFORM progress_display USING 'Retrieving Condition Records Data' '50'.
+  PERFORM a359_fetch. " Plant/Matl group
+  PERFORM a504_fetch. " Plant/Vendor/Material/Tax Code
+  PERFORM a515_fetch. " Plant/Vendor/Tax Code
+  PERFORM a519_fetch. " Vendor/Tax Code
+  PERFORM a536_fetch. " Tax Code
+ENDFORM.
+
+FORM process_data .
+  PERFORM progress_display USING 'Processing Condition Records Data' '50'.
+  PERFORM a359_process.
+  PERFORM a504_process.
+  PERFORM a515_process.
+  PERFORM a519_process.
+  PERFORM a536_process.
+ENDFORM.
+
+FORM bdc .
+  PERFORM progress_display USING 'Delimiting Condition Records' '50'.
+  PERFORM a359_bdc.
+  PERFORM a504_bdc.
+  PERFORM a515_bdc.
+  PERFORM a519_bdc.
+  PERFORM a536_bdc.
+  PERFORM progress_display USING 'Delimiting Condition Records' '50'.
+ENDFORM.
+
+FORM popup_notice .
+  CALL FUNCTION 'POPUP_TO_INFORM'
+    EXPORTING
+      titel = 'Pleae Note:'
+      txt1  = 'This program will delimit(30.06.2017) the condition records of all valid'
+      txt2  = 'access sequences of the following condition types via FV11:'
+      txt3  = 'JEC1, JEX1, JHX1, JMOP, JMX1, JSEP, JVCS, JVRD'.
+ENDFORM.
+
+FORM progress_display  USING    VALUE(p_txt)
+                                VALUE(p_per).
+
+  CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR'
+    EXPORTING
+      percentage = p_per
+      text       = p_txt.
+
+ENDFORM.
+
+FORM date_convert .
+  CALL FUNCTION 'CONVERT_DATE_TO_EXTERNAL'
+    EXPORTING
+      date_internal            = sy-datum
+    IMPORTING
+      date_external            = v_datum
+    EXCEPTIONS
+      date_internal_is_invalid = 1
+      OTHERS                   = 2.
+  IF sy-subrc <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+ENDFORM.

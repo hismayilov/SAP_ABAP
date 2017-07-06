@@ -1,0 +1,75 @@
+*&---------------------------------------------------------------------*
+*& Report  ZGST_CONDN_DELIMIT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT zgst_condn_delimit.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE text-001.
+PARAMETERS: fv11 RADIOBUTTON GROUP trs USER-COMMAND usr DEFAULT 'X',
+            mek1 RADIOBUTTON GROUP trs,
+            vk11 RADIOBUTTON GROUP trs.
+SELECTION-SCREEN END OF BLOCK b1.
+
+SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE text-002.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 2(60) text-fv1 MODIF ID fv1.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF BLOCK b2.
+
+SELECTION-SCREEN BEGIN OF BLOCK b3 WITH FRAME TITLE text-003.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 2(79) text-me1 MODIF ID me1.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF BLOCK b3.
+
+SELECTION-SCREEN BEGIN OF BLOCK b4 WITH FRAME TITLE text-004.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 2(79) text-vk1 MODIF ID vk1.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 2(79) text-vk2 MODIF ID vk1.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF BLOCK b4.
+
+AT SELECTION-SCREEN OUTPUT.
+  LOOP AT SCREEN.
+    IF screen-group1 EQ 'FV1'.
+      IF fv11 EQ 'X' AND mek1 NE 'X' AND vk11 NE 'X'.
+        screen-active = 1.
+      ELSE.
+        screen-active = 0.
+      ENDIF.
+      MODIFY SCREEN.
+    ENDIF.
+
+    IF screen-group1 EQ 'ME1'.
+      IF fv11 NE 'X' AND mek1 EQ 'X' AND vk11 NE 'X'.
+        screen-active = 1.
+      ELSE.
+        screen-active = 0.
+      ENDIF.
+      MODIFY SCREEN.
+    ENDIF.
+
+    IF screen-group1 EQ 'VK1'.
+      IF fv11 NE 'X' AND mek1 NE 'X' AND vk11 EQ 'X'.
+        screen-active = 1.
+      ELSE.
+        screen-active = 0.
+      ENDIF.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+
+START-OF-SELECTION.
+
+  IF fv11 EQ 'X'.
+    SUBMIT zfv11_condn_delimit VIA SELECTION-SCREEN WITH ctu EQ 'X'.
+  ELSEIF mek1 EQ 'X'.
+    SUBMIT zmek1_condn_delimit VIA SELECTION-SCREEN WITH ctu EQ 'X'.
+  ELSEIF vk11 EQ 'X'.
+    SUBMIT zvk11_condn_delimit VIA SELECTION-SCREEN WITH ctu EQ 'X'.
+  ENDIF.

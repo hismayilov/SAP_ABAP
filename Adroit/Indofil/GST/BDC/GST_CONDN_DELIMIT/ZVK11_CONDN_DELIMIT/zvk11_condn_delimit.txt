@@ -1,0 +1,114 @@
+* Author - Saurabh Khare (Adroit Infotech Pvt. Ltd) *
+* Date - Friday, June 30, 2017 09:19:44 *
+
+REPORT zvk11_condn_delimit
+       NO STANDARD PAGE HEADING LINE-SIZE 255.
+
+* Include *
+INCLUDE bdcrecx1.
+INCLUDE zinc_vk11_condn_dd.
+INCLUDE zinc_vk11_condn_fetch.
+INCLUDE zinc_vk11_condn_process.
+INCLUDE zinc_vk11_condn_bdc.
+
+INITIALIZATION.
+  PERFORM popup_notice.
+  PERFORM date_convert.
+
+START-OF-SELECTION.
+
+  PERFORM get_data.
+  PERFORM process_data.
+  IF it_tab_056[] IS INITIAL
+    AND it_tab_110[] IS INITIAL
+    AND it_tab_357[] IS INITIAL
+    AND it_tab_358[] IS INITIAL
+    AND it_tab_367[] IS INITIAL
+    AND it_tab_368[] IS INITIAL
+    AND it_tab_372[] IS INITIAL
+    AND it_tab_602[] IS INITIAL
+    AND it_tab_604[] IS INITIAL
+    AND it_tab_902[] IS INITIAL.
+    MESSAGE 'No data found' TYPE 'S' DISPLAY LIKE 'E'.
+    EXIT.
+  ELSE.
+    PERFORM bdc.
+  ENDIF.
+
+FORM get_data.
+  PERFORM progress_display USING 'Retrieving Condition Records Data' '50'.
+  PERFORM a056_fetch. " Sales Org./Order/Plant
+  PERFORM a110_fetch. " Sales Organization/Destination Country
+  PERFORM a357_fetch. " Country/Plant/Ctrl code
+  PERFORM a358_fetch. " Country/Plant/Ctrl code/Material
+  PERFORM a367_fetch. " Country/Plant/Region/Material
+  PERFORM a368_fetch. " Country/PlntRegion/Region/TaxCl1Cust/TaxCl.Mat
+*  PERFORM a372_fetch. " Sales org./Ref.doc./Ref.item
+  PERFORM a602_fetch. " Country/PlntRegion/Region/TaxCl2Cust/TaxCl.2Mat
+  PERFORM a604_fetch. " Country/PlntRegion/Region/Material/TaxCl1Cust/TaxCl.Mat-JCST
+  PERFORM a902_fetch. " Sales org./Distr. Chl/Division/Plant/Sales Grp/Mat.pr.grp
+ENDFORM.
+
+FORM process_data.
+  PERFORM progress_display USING 'Processing Condition Records Data' '50'.
+  PERFORM a056_process.
+  PERFORM a110_process.
+  PERFORM a357_process.
+  PERFORM a358_process.
+  PERFORM a367_process.
+  PERFORM a368_process.
+*  PERFORM a372_process.
+  PERFORM a602_process.
+  PERFORM a604_process.
+  PERFORM a902_process.
+ENDFORM.
+
+FORM bdc.
+  PERFORM progress_display USING 'Delimiting Condition Records' '50'.
+  PERFORM a056_bdc.
+  PERFORM a110_bdc.
+  PERFORM a357_bdc.
+  PERFORM a358_bdc.
+  PERFORM a367_bdc.
+  PERFORM a368_bdc.
+*  PERFORM a372_bdc.
+  PERFORM a602_bdc.
+  PERFORM a604_bdc.
+  PERFORM a902_bdc.
+  PERFORM progress_display USING 'Delimiting Condition Records' '50'.
+ENDFORM.
+
+FORM popup_notice .
+  CALL FUNCTION 'POPUP_TO_INFORM'
+    EXPORTING
+      titel = 'Pleae Note:'
+      txt1  = 'This program will delimit(30.06.2017) the condition records of all valid'
+      txt2  = 'access sequences of the following condition types via VK11:'
+      txt3  = 'JCED, JCEP, JCET, JCST, JEAP, JESP, JEXP, JEXT, UTX1, UTXJ, ZACD, ZAVT, ZCEP'
+      txt4  = 'ZCET, ZCST, ZKF2, ZTRP'.
+ENDFORM.
+
+FORM progress_display  USING    VALUE(p_txt)
+                                VALUE(p_per).
+
+  CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR'
+   EXPORTING
+     PERCENTAGE       = p_per
+     TEXT             = p_txt.
+
+ENDFORM.
+
+FORM date_convert .
+  CALL FUNCTION 'CONVERT_DATE_TO_EXTERNAL'
+    EXPORTING
+      date_internal            = sy-datum
+    IMPORTING
+      date_external            = v_datum
+    EXCEPTIONS
+      date_internal_is_invalid = 1
+      OTHERS                   = 2.
+  IF sy-subrc <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+ENDFORM.

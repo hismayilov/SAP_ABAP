@@ -1,0 +1,21 @@
+class CX_SY_MESSAGE_ILLEGAL_TEXT definition
+  public
+  inheriting from CX_DYNAMIC_CHECK
+  final
+  create public .
+
+*"* public components of class CX_SY_MESSAGE_ILLEGAL_TEXT
+*"* do not include other source files here!!!
+public section.
+
+  constants CX_SY_MESSAGE_ILLEGAL_TEXT type SOTR_CONC
+ value '6F0F313FD90DB647E10000000A114BF5'. "#EC NOTEXT
+  constants ILLEGAL_TYPE type SOTR_CONC
+ value '870F313FD90DB647E10000000A114BF5'. "#EC NOTEXT
+  constants INITIAL_REF type SOTR_CONC
+ value 'BA0E313FD90DB747E10000000A114BF5'. "#EC NOTEXT
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional .

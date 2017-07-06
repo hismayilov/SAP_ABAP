@@ -1,0 +1,571 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZINC_VK11_CONDN_BDC
+*&---------------------------------------------------------------------*
+
+FORM a056_bdc .
+  IF it_tab_056[] IS NOT INITIAL.
+    SORT it_tab_056 ASCENDING BY kschl vkorgau.
+
+    LOOP AT it_tab_056 INTO wa_tab_056.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_056-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A056' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_056-vkorgau."'1101'.
+      PERFORM bdc_field       USING 'F002-LOW'
+                                    wa_tab_056-werks."'0010000027'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1056'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_056.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a110_bdc .
+  IF it_tab_110[] IS NOT INITIAL.
+    SORT it_tab_110 ASCENDING BY kschl vkorg.
+
+    LOOP AT it_tab_110 INTO wa_tab_110.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_110-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(02)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(02)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A110' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_110-vkorg."'1101'.
+      PERFORM bdc_field       USING 'F002-LOW'
+                                    wa_tab_110-lland."'0010000027'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1110'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_110.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a357_bdc .
+  IF it_tab_357[] IS NOT INITIAL.
+    SORT it_tab_357 ASCENDING BY kschl aland werks.
+
+    LOOP AT it_tab_357 INTO wa_tab_357.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_357-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(08)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    ''.
+      PERFORM bdc_field       USING 'RV130-SELKZ(08)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A357' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_357-aland."'3571'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_357-werks."'0010000027'.
+      PERFORM bdc_field       USING 'F003-LOW'
+                                    wa_tab_357-steuc."'15020000'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1357'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_357.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a358_bdc .
+  IF it_tab_358[] IS NOT INITIAL.
+    SORT it_tab_358 ASCENDING BY kschl aland werks steuc.
+
+    LOOP AT it_tab_358 INTO wa_tab_358.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_358-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(07)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    ''.
+      PERFORM bdc_field       USING 'RV130-SELKZ(07)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A358' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_358-aland."'3581'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_358-werks."'0010000027'.
+      PERFORM bdc_field       USING 'F003'
+                                    wa_tab_358-steuc."'000000000010001243'.
+      PERFORM bdc_field       USING 'F004-LOW'
+                                    wa_tab_358-matnr."'05'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1358'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_358.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a367_bdc .
+  IF it_tab_367[] IS NOT INITIAL.
+    SORT it_tab_367 ASCENDING BY kschl aland werks regio.
+
+    LOOP AT it_tab_367 INTO wa_tab_367.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_367-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A367' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_367-aland."'3671'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_367-werks."'0010000027'.
+      PERFORM bdc_field       USING 'F003'
+                                    wa_tab_367-regio."'000000000010001243'.
+      PERFORM bdc_field       USING 'F004-LOW'
+                                    wa_tab_367-matnr."'05'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1367'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_367.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a368_bdc .
+  IF it_tab_368[] IS NOT INITIAL.
+    SORT it_tab_368 ASCENDING BY kschl aland wkreg regio taxk1.
+
+    LOOP AT it_tab_368 INTO wa_tab_368.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_368-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(02)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    ''.
+      PERFORM bdc_field       USING 'RV130-SELKZ(02)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A368' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_368-aland."'3681'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_368-wkreg."'0010000027'.
+      PERFORM bdc_field       USING 'F003'
+                                    wa_tab_368-regio."'000000000010001243'.
+      PERFORM bdc_field       USING 'F004'
+                                    wa_tab_368-taxk1."'05'.
+      PERFORM bdc_field       USING 'F005-LOW'
+                                    wa_tab_368-taxm1."'05'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1368'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_368.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a372_bdc .
+  IF it_tab_372[] IS NOT INITIAL.
+    SORT it_tab_372 ASCENDING BY kschl vkorg vgbel.
+
+    LOOP AT it_tab_372 INTO wa_tab_372.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_372-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A372' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_372-vkorg."'3721'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_372-vgbel."'0010000027'.
+      PERFORM bdc_field       USING 'F003-LOW'
+                                    wa_tab_372-vgpos."'000000000010001243'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1372'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_372.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a602_bdc .
+  IF it_tab_602[] IS NOT INITIAL.
+    SORT it_tab_602 ASCENDING BY kschl aland wkreg regio taxk2.
+
+    LOOP AT it_tab_602 INTO wa_tab_602.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_602-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(02)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    ''.
+      PERFORM bdc_field       USING 'RV130-SELKZ(02)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A602' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_602-aland."'6021'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_602-wkreg."'0010000027'.
+      PERFORM bdc_field       USING 'F003'
+                                    wa_tab_602-regio."'000000000010001243'.
+      PERFORM bdc_field       USING 'F004'
+                                    wa_tab_602-taxk2."'05'.
+      PERFORM bdc_field       USING 'F005-LOW'
+                                    wa_tab_602-taxm2."'05'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1602'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_602.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a604_bdc .
+  IF it_tab_604[] IS NOT INITIAL.
+    SORT it_tab_604 ASCENDING BY kschl aland wkreg regio matnr taxk1.
+
+    LOOP AT it_tab_604 INTO wa_tab_604.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_604-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A604' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_604-aland."'6041'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_604-wkreg."'0010000027'.
+      PERFORM bdc_field       USING 'F003'
+                                    wa_tab_604-regio."'000000000010001243'.
+      PERFORM bdc_field       USING 'F004'
+                                    wa_tab_604-matnr."'05'.
+      PERFORM bdc_field       USING 'F005'
+                                    wa_tab_604-taxk1."'05'.
+      PERFORM bdc_field       USING 'F006-LOW'
+                                    wa_tab_604-taxm1."'05'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1604'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_604.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a902_bdc .
+  IF it_tab_902[] IS NOT INITIAL.
+    SORT it_tab_902 ASCENDING BY kschl vkorg vtweg spart werks vkgrp.
+
+    LOOP AT it_tab_902 INTO wa_tab_902.
+
+      PERFORM open_group.
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-KSCHL'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ANTA'.
+      PERFORM bdc_field       USING 'RV13A-KSCHL'
+                                    wa_tab_902-kschl."'JEAP'.
+
+      PERFORM bdc_dynpro      USING 'SAPLV14A' '0100'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV130-SELKZ(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=WEIT'.
+      PERFORM bdc_field       USING 'RV130-SELKZ(01)'
+                                    'X'.
+
+      PERFORM bdc_dynpro      USING 'RV13A902' '1000'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'SEL_DATE'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=ONLI'.
+      PERFORM bdc_field       USING 'F001'
+                                    wa_tab_902-vkorg."'9021'.
+      PERFORM bdc_field       USING 'F002'
+                                    wa_tab_902-vtweg."'0010000027'.
+      PERFORM bdc_field       USING 'F003'
+                                    wa_tab_902-spart."'000000000010001243'.
+      PERFORM bdc_field       USING 'F004'
+                                    wa_tab_902-werks."'05'.
+      PERFORM bdc_field       USING 'F005'
+                                    wa_tab_902-vkgrp."'05'.
+      PERFORM bdc_field       USING 'F006-LOW'
+                                    wa_tab_902-kondm."'05'.
+      PERFORM bdc_field       USING 'SEL_DATE'
+                                    v_datum."'30.03.2017'
+
+      PERFORM bdc_dynpro      USING 'SAPMV13A' '1902'.
+      PERFORM bdc_field       USING 'BDC_CURSOR'
+                                    'RV13A-DATBI(01)'.
+      PERFORM bdc_field       USING 'BDC_OKCODE'
+                                    '=SICH'.
+      PERFORM bdc_field       USING 'RV13A-DATBI(01)'
+                                    '30.06.2017'.
+      PERFORM bdc_transaction USING 'VK12'.
+
+      PERFORM close_group.
+
+      CLEAR wa_tab_902.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.

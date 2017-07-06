@@ -1,0 +1,103 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZINC_VK11_CONDN_PROCESS
+*&---------------------------------------------------------------------*
+
+FORM a056_process .
+  IF it_a056[] IS NOT INITIAL.
+    LOOP AT it_a056 INTO wa_a056.
+      MOVE-CORRESPONDING wa_a056 TO wa_tab_056.
+      APPEND wa_tab_056 TO it_tab_056.
+      CLEAR: wa_tab_056, wa_a056.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a110_process .
+  IF it_a110[] IS NOT INITIAL.
+    LOOP AT it_a110 INTO wa_a110.
+      MOVE-CORRESPONDING wa_a110 TO wa_tab_110.
+      APPEND wa_tab_110 TO it_tab_110.
+      CLEAR: wa_tab_110, wa_a110.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a357_process .
+  IF it_a357[] IS NOT INITIAL.
+    LOOP AT it_a357 INTO wa_a357.
+      MOVE-CORRESPONDING wa_a357 TO wa_tab_357.
+      APPEND wa_tab_357 TO it_tab_357.
+      CLEAR: wa_tab_357, wa_a357.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a358_process .
+  IF it_a358[] IS NOT INITIAL.
+    LOOP AT it_a358 INTO wa_a358.
+      MOVE-CORRESPONDING wa_a358 TO wa_tab_358.
+      APPEND wa_tab_358 TO it_tab_358.
+      CLEAR: wa_tab_358, wa_a358.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a367_process .
+  IF it_a367[] IS NOT INITIAL.
+    LOOP AT it_a367 INTO wa_a367.
+      MOVE-CORRESPONDING wa_a367 TO wa_tab_367.
+      APPEND wa_tab_367 TO it_tab_367.
+      CLEAR: wa_tab_367, wa_a367.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a368_process .
+  IF it_a368[] IS NOT INITIAL.
+    LOOP AT it_a368 INTO wa_a368.
+      MOVE-CORRESPONDING wa_a368 TO wa_tab_368.
+      APPEND wa_tab_368 TO it_tab_368.
+      CLEAR: wa_tab_368, wa_a368.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a372_process .
+  IF it_a372[] IS NOT INITIAL.
+    LOOP AT it_a372 INTO wa_a372.
+      MOVE-CORRESPONDING wa_a372 TO wa_tab_372.
+      APPEND wa_tab_372 TO it_tab_372.
+      CLEAR: wa_tab_372, wa_a372.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a602_process .
+  IF it_a602[] IS NOT INITIAL.
+    LOOP AT it_a602 INTO wa_a602.
+      MOVE-CORRESPONDING wa_a602 TO wa_tab_602.
+      APPEND wa_tab_602 TO it_tab_602.
+      CLEAR: wa_tab_602, wa_a602.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a604_process .
+  IF it_a604[] IS NOT INITIAL.
+    LOOP AT it_a604 INTO wa_a604.
+      MOVE-CORRESPONDING wa_a604 TO wa_tab_604.
+      APPEND wa_tab_604 TO it_tab_604.
+      CLEAR: wa_tab_604, wa_a604.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+FORM a902_process .
+  IF it_a902[] IS NOT INITIAL.
+    LOOP AT it_a902 INTO wa_a902.
+      MOVE-CORRESPONDING wa_a902 TO wa_tab_902.
+      APPEND wa_tab_902 TO it_tab_902.
+      CLEAR: wa_tab_902, wa_a902.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
