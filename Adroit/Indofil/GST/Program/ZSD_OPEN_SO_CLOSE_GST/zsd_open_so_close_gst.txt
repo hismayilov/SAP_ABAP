@@ -1,0 +1,292 @@
+* Author - Saurabh Khare (Adroit Infotech Ltd.) *
+* Date - Sunday, July 02, 2017 13:41:44 *
+
+REPORT sy-repid.
+
+* tables *
+TABLES: vbak.
+
+* types *
+TYPES: BEGIN OF ty_log,
+         vbeln TYPE vbeln,
+         posnr TYPE posnr,
+         msg   TYPE string,
+       END OF ty_log.
+
+* constants *
+CONSTANTS: reason TYPE augru VALUE '91'.
+
+* data *
+DATA: it_vbup TYPE TABLE OF vbup,
+      wa_vbup TYPE vbup,
+
+      it_data LIKE it_vbup,
+      wa_data LIKE wa_vbup,
+
+      it_view TYPE TABLE OF wb2_v_vbak_vbap2,
+      wa_view TYPE wb2_v_vbak_vbap2.
+
+* BAPI Data *
+DATA: salesdoc    TYPE bapivbeln-vbeln,
+      ordheadx    TYPE bapisdh1x,
+
+      it_return   TYPE TABLE OF bapiret2,
+      wa_return   TYPE bapiret2,
+      return      TYPE TABLE OF bapiret2   WITH HEADER LINE,
+      orditem     TYPE TABLE OF bapisditm  WITH HEADER LINE,
+      orditemx    TYPE TABLE OF bapisditmx WITH HEADER LINE,
+      it_log      TYPE STANDARD TABLE OF ty_log,
+      wa_log      TYPE ty_log,
+      it_retfname TYPE TABLE OF fieldnames,
+      wa_retfname TYPE fieldnames,
+      it_logfname TYPE TABLE OF fieldnames,
+      wa_logfname TYPE fieldnames.
+
+DATA: msg       TYPE string,
+      file      TYPE string,
+      path      TYPE string,
+      file_path TYPE string,
+      title     TYPE string,
+      defname   TYPE string,
+      defext    TYPE string,
+      lines     TYPE i,
+      per       TYPE p,
+      per_c(3)  TYPE c.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE text-001.
+PARAMETERS: p_vkorg TYPE vkorg OBLIGATORY,
+            p_vtweg TYPE vtweg OBLIGATORY,
+            p_spart TYPE spart OBLIGATORY.
+SELECT-OPTIONS: s_auart FOR vbak-auart,
+                s_audat FOR vbak-audat.
+SELECTION-SCREEN END OF BLOCK b1.
+
+START-OF-SELECTION.
+
+  MESSAGE 'Open SO line items will be closed with reason for rejection -> 91 (Short closed for GST)' TYPE 'S'.
+
+  REFRESH: it_vbup[], it_data[].
+
+  SELECT *
+  FROM vbup
+  INTO TABLE it_vbup
+  WHERE lfsta EQ 'A'
+  OR    lfsta EQ 'B'.
+
+  IF sy-subrc = 0 AND it_vbup[] IS NOT INITIAL.
+    SORT it_vbup[] ASCENDING BY vbeln posnr.
+    SELECT *
+      FROM wb2_v_vbak_vbap2
+      INTO TABLE it_view
+      FOR ALL ENTRIES IN it_vbup
+      WHERE vbeln_i = it_vbup-vbeln
+      AND   posnr_i = it_vbup-posnr
+      AND   abgru_i NE reason
+      AND   vkorg EQ p_vkorg"'1000'
+      AND   vtweg EQ p_vtweg"'10'
+      AND   spart EQ p_spart"'10'
+      AND   audat IN s_audat"'20170101'.
+      AND   auart IN s_auart."('ZBDS', 'ZBLK').
+
+    IF it_view IS NOT INITIAL.
+      SORT it_view[] ASCENDING BY vbeln_i posnr_i.
+      LOOP AT it_vbup INTO wa_vbup.
+        READ TABLE it_view INTO wa_view WITH KEY vbeln_i = wa_vbup-vbeln
+                                                 posnr_i = wa_vbup-posnr.
+        IF sy-subrc <> 0.
+          DELETE it_vbup.
+        ENDIF.
+        CLEAR: wa_vbup, wa_view.
+      ENDLOOP.
+    ELSE.
+      REFRESH it_vbup[].
+    ENDIF.
+
+    IF it_vbup[] IS NOT INITIAL.
+      it_data[] = it_vbup[].
+
+      DESCRIBE TABLE it_vbup LINES lines.
+      DELETE ADJACENT DUPLICATES FROM it_data COMPARING vbeln.
+
+      LOOP AT it_data INTO wa_data.
+        IF ( sy-tabix MOD 200 EQ 0 ).
+          per = ( sy-tabix / lines ) * 100.
+          MOVE per TO per_c.
+          CLEAR msg.
+          CONCATENATE 'Processing Sales Documents...' per_c '% complete' INTO msg SEPARATED BY space.
+          CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR'
+            EXPORTING
+              percentage = per_c
+              text       = msg.
+        ENDIF.
+        CLEAR: salesdoc, ordheadx.
+        REFRESH: orditem[], orditemx[], return[].
+        salesdoc = wa_data-vbeln.
+        ordheadx-updateflag = 'U'.
+
+        LOOP AT it_vbup INTO wa_vbup WHERE vbeln = wa_data-vbeln.
+          orditem-itm_number = wa_vbup-posnr.
+          orditem-reason_rej = reason.
+          APPEND orditem.
+
+          orditemx-itm_number = wa_vbup-posnr.
+          orditemx-updateflag = 'U'.
+          orditemx-reason_rej = 'X'.
+          APPEND orditemx.
+          CLEAR: orditem, orditemx, wa_vbup.
+        ENDLOOP.
+
+        IF orditem[] IS NOT INITIAL.
+          CALL FUNCTION 'BAPI_SALESORDER_CHANGE'
+            EXPORTING
+              salesdocument    = salesdoc
+              order_header_inx = ordheadx
+            TABLES
+              return           = return
+              order_item_in    = orditem
+              order_item_inx   = orditemx.
+
+          READ TABLE return WITH KEY type = 'E'.
+          IF sy-subrc = 0.
+            MOVE-CORRESPONDING return TO wa_return.
+            wa_return-message_v4 = salesdoc.
+            APPEND wa_return TO it_return.
+            CLEAR wa_return.
+          ELSE.
+            CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'.
+            LOOP AT orditem.
+              wa_log-vbeln = salesdoc.
+              wa_log-posnr = orditem-itm_number.
+              CLEAR msg.
+              msg = 'Short closed for GST'.
+              MOVE msg TO wa_log-msg.
+              APPEND wa_log TO it_log.
+              CLEAR: wa_log, orditem.
+            ENDLOOP.
+          ENDIF.
+        ENDIF.
+        CLEAR: wa_data, return.
+      ENDLOOP.
+    ELSE.
+      MESSAGE 'No data found' TYPE 'S' DISPLAY LIKE 'E'.
+      EXIT.
+    ENDIF.
+  ENDIF.
+
+* create return header *
+  IF it_return[] IS NOT INITIAL.
+    PERFORM ret_head USING 'TYPE'.
+    PERFORM ret_head USING 'ID'.
+    PERFORM ret_head USING 'NUMBER'.
+    PERFORM ret_head USING 'MESSAGE'.
+    PERFORM ret_head USING 'LOG_NO'.
+    PERFORM ret_head USING 'LOG_MSG_NO'.
+    PERFORM ret_head USING 'MESSAGE_V1'.
+    PERFORM ret_head USING 'MESSAGE_V2'.
+    PERFORM ret_head USING 'MESSAGE_V3'.
+    PERFORM ret_head USING 'MESSAGE_V4'.
+    PERFORM ret_head USING 'PARAMETER'.
+    PERFORM ret_head USING 'ROW'.
+    PERFORM ret_head USING 'FIELD'.
+    PERFORM ret_head USING 'SYSTEM'.
+
+* Download return file *
+    PERFORM down_ret.
+  ENDIF.
+
+  IF it_log[] IS NOT INITIAL.
+* create log header *
+    PERFORM log_head USING 'SALESDOC'.
+    PERFORM log_head USING 'LINE ITEM'.
+    PERFORM log_head USING 'MESSAGE'.
+
+* Download return file *
+    PERFORM down_log.
+  ENDIF.
+
+*&---------------------------------------------------------------------*
+*&      Form  RET_HEAD
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_0424   text
+*----------------------------------------------------------------------*
+FORM ret_head  USING    VALUE(p_name).
+  CLEAR wa_retfname.
+  wa_retfname-fieldname = p_name.
+  APPEND wa_retfname TO it_retfname.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  LOG_HEAD
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_0480   text
+*----------------------------------------------------------------------*
+FORM log_head  USING    VALUE(p_name).
+  CLEAR wa_logfname.
+  wa_logfname-fieldname = p_name.
+  APPEND wa_logfname TO it_logfname.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  DOWN_RET
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM down_ret .
+  CLEAR: file, path, file_path, title, defname, defext.
+  title = 'Save error log'.
+  defname = 'so_close_error_log.xls'.
+  defext = 'xls'.
+  CALL METHOD cl_gui_frontend_services=>file_save_dialog
+    EXPORTING
+      window_title      = title
+      default_file_name = defname
+      default_extension = defext
+    CHANGING
+      filename          = file
+      path              = path
+      fullpath          = file_path.
+
+  CALL METHOD cl_gui_frontend_services=>gui_download
+    EXPORTING
+      filename              = file_path
+      write_field_separator = 'X'
+      fieldnames            = it_retfname
+    CHANGING
+      data_tab              = it_return.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  DOWN_LOG
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM down_log .
+  CLEAR: file, path, file_path, title, defname, defext.
+  title = 'Save success log'.
+  defname = 'so_close_success_log.xls'.
+  defext = 'xls'.
+  CALL METHOD cl_gui_frontend_services=>file_save_dialog
+    EXPORTING
+      window_title      = title
+      default_file_name = defname
+      default_extension = defext
+    CHANGING
+      filename          = file
+      path              = path
+      fullpath          = file_path.
+
+  CALL METHOD cl_gui_frontend_services=>gui_download
+    EXPORTING
+      filename              = file_path
+      write_field_separator = 'X'
+      fieldnames            = it_logfname
+    CHANGING
+      data_tab              = it_log.
+ENDFORM.

@@ -1,0 +1,530 @@
+*&---------------------------------------------------------------------*
+*& Report  ZMM_EXTEND_MAT_SALORG
+*&
+*&---------------------------------------------------------------------*
+*& Author: Saurabh Khare (Adroit Infotech Ltd)
+*& Date: Wednesday, July 05, 2017 19:04:46
+*&---------------------------------------------------------------------*
+REPORT zmm_extend_mat_salorg.
+
+* Data Declaration *
+* Tables *
+TABLES: mara, marc, mvke, v_mdg_mat_mvke.
+* Types *
+TYPES: BEGIN OF ty_data,
+         matnr TYPE mara-matnr,
+       END OF ty_data,
+
+       BEGIN OF ty_log,
+         matnr TYPE matnr,
+         msg   TYPE string,
+       END OF ty_log.
+
+* Internal Tables *
+DATA: it_view TYPE TABLE OF v_mdg_mat_mvke,
+      wa_view LIKE LINE OF it_view,
+
+      it_mara TYPE TABLE OF mara,
+      wa_mara TYPE mara,
+
+      it_marc TYPE TABLE OF marc,
+      wa_marc TYPE marc,
+
+      it_data TYPE TABLE OF ty_data,
+      wa_data TYPE ty_data,
+
+      it_log  TYPE TABLE OF ty_log,
+      wa_log  TYPE ty_log.
+* Variables *
+DATA: material TYPE matnr,
+      lines(5) TYPE c,
+      msg      TYPE string,
+      answer   TYPE c.
+
+* BAPI Related *
+DATA: headdata    TYPE bapimathead,
+      clientdata  TYPE bapi_mara,
+      clientdatax TYPE bapi_marax,
+      plantdata   TYPE bapi_marc,
+      plantdatax  TYPE bapi_marcx,
+      salesdata   TYPE bapi_mvke,
+      salesdatax  TYPE bapi_mvkex,
+      return      TYPE bapiret2.
+
+DATA: taxclassifications TYPE TABLE OF bapi_mlan WITH HEADER LINE,
+      returnmessages     TYPE TABLE OF bapiret2 WITH HEADER LINE,
+      errormessages      TYPE TABLE OF bapiret2,
+      wa_errormessages   TYPE bapiret2.
+
+DATA: steuertab TYPE TABLE OF mg03steuer WITH HEADER LINE.
+
+* File output related *
+DATA: it_errfname TYPE TABLE OF fieldnames,
+      wa_errfname TYPE fieldnames,
+      it_logfname TYPE TABLE OF fieldnames,
+      wa_logfname TYPE fieldnames.
+
+DATA: file      TYPE string,
+      path      TYPE string,
+      file_path TYPE string,
+      title     TYPE string,
+      defname   TYPE string,
+      defext    TYPE string.
+
+* Selection Screen *
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE text-001.
+SELECT-OPTIONS: s_matnr FOR mara-matnr.
+PARAMETERS:     p_werks TYPE marc-werks OBLIGATORY,
+                p_vkorg TYPE mvke-vkorg OBLIGATORY,
+                p_vtweg TYPE mvke-vtweg OBLIGATORY.
+SELECTION-SCREEN END OF BLOCK b1.
+
+START-OF-SELECTION.
+  PERFORM validation.
+  PERFORM data_retreival.
+  PERFORM check_extensibility.
+  PERFORM material_extension.
+  PERFORM log_output.
+*&---------------------------------------------------------------------*
+*&      Form  DATA_RETREIVAL
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM data_retreival .
+  SELECT *
+    FROM mara
+    INTO TABLE it_mara
+    WHERE matnr IN s_matnr.
+
+  IF it_mara[] IS NOT INITIAL.
+
+    SELECT *
+      FROM marc
+      INTO TABLE it_marc
+      FOR ALL ENTRIES IN it_mara
+      WHERE matnr = it_mara-matnr
+      AND   werks = p_werks.
+
+    IF it_marc[] IS NOT INITIAL.
+
+      SELECT *
+        FROM v_mdg_mat_mvke
+        INTO TABLE it_view
+        FOR ALL ENTRIES IN it_marc
+        WHERE matnr = it_marc-matnr
+        AND   werks = p_werks
+        AND   vkorg = p_vkorg
+        AND   vtweg = p_vtweg.
+
+    ENDIF.
+  ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  CHECK_EXTENSIBILITY
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM check_extensibility .
+* Remove invalid materials *
+*  IF it_mara[] IS NOT INITIAL.
+  IF it_data[] IS NOT INITIAL.
+    LOOP AT it_data INTO wa_data.
+      READ TABLE it_mara INTO wa_mara WITH KEY matnr = wa_data-matnr.
+      IF sy-subrc <> 0.
+        wa_log-matnr = wa_data-matnr.
+        wa_log-msg   = 'Invalid material'.
+        APPEND wa_log TO it_log.
+        DELETE it_data WHERE matnr = wa_data-matnr.
+      ENDIF.
+      CLEAR: wa_data, wa_mara.
+    ENDLOOP.
+  ENDIF.
+*  ENDIF.
+
+* Remove materials not maintained in given plant *
+*  IF it_marc[] IS NOT INITIAL.
+  IF it_data[] IS NOT INITIAL.
+    LOOP AT it_data INTO wa_data.
+      READ TABLE it_marc INTO wa_marc WITH KEY matnr = wa_data-matnr.
+      IF sy-subrc <> 0.
+        wa_log-matnr = wa_data-matnr.
+        wa_log-msg   = 'Material not maintained for given plant'.
+        APPEND wa_log TO it_log.
+        DELETE it_data WHERE matnr = wa_data-matnr.
+      ENDIF.
+      CLEAR: wa_data, wa_marc.
+    ENDLOOP.
+  ENDIF.
+*  ENDIF.
+
+* Remove materials already extended to given combination *
+*  IF it_view[] IS NOT INITIAL.
+  IF it_data[] IS NOT INITIAL.
+    LOOP AT it_data INTO wa_data.
+      READ TABLE it_view INTO wa_view WITH KEY matnr = wa_data-matnr.
+      IF sy-subrc = 0.
+        wa_log-matnr = wa_data-matnr.
+        wa_log-msg   = 'Material already extended to given plant/sales org/distr. channel'.
+        APPEND wa_log TO it_log.
+        DELETE it_data WHERE matnr = wa_data-matnr.
+      ENDIF.
+      CLEAR: wa_data, wa_marc.
+    ENDLOOP.
+  ENDIF.
+*  ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  VALIDATION
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM validation .
+* Make material mandatory *
+  IF s_matnr IS INITIAL.
+    MESSAGE 'Please enter material' TYPE 'S' DISPLAY LIKE 'E'.
+    STOP.
+  ELSE.
+* Get all materials in specified range *
+    REFRESH it_data[].
+    IF s_matnr-option EQ 'BT'.
+      WHILE NOT s_matnr-low GT s_matnr-high.
+        wa_data-matnr = s_matnr-low.
+        APPEND wa_data TO it_data.
+        ADD 1 TO s_matnr-low.
+        UNPACK s_matnr-low TO s_matnr-low.
+        CLEAR: wa_data.
+      ENDWHILE.
+    ENDIF.
+    IF s_matnr-option EQ 'EQ'.
+      LOOP AT s_matnr.
+        wa_data-matnr = s_matnr-low.
+        APPEND wa_data TO it_data.
+        CLEAR: wa_data.
+      ENDLOOP.
+    ENDIF.
+  ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  MATERIAL_EXTENSION
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM material_extension .
+  IF it_data[] IS NOT INITIAL.
+    DESCRIBE TABLE it_data[] LINES lines.
+    CLEAR: msg, answer.
+    SHIFT lines LEFT DELETING LEADING space.
+    CONCATENATE lines 'materials will be extended to given plant/sales.org/distr. chan. combination. Continue?'
+    INTO msg SEPARATED BY space.
+    CALL FUNCTION 'POPUP_TO_CONFIRM'
+      EXPORTING
+        titlebar       = 'Extend Confirmation'
+*       DIAGNOSE_OBJECT             = ' '
+        text_question  = msg
+        text_button_1  = 'Yes'
+        text_button_2  = 'No'
+*       START_COLUMN   = 25
+*       START_ROW      = 6
+      IMPORTING
+        answer         = answer
+      EXCEPTIONS
+        text_not_found = 1
+        OTHERS         = 2.
+
+    IF answer = '1'.
+      LOOP AT it_data INTO wa_data.
+        CLEAR headdata.
+        headdata-material = wa_data-matnr.
+        headdata-ind_sector = 'C'.
+        CLEAR material.
+        MOVE headdata-material TO material.
+        SHIFT material LEFT DELETING LEADING '0'.
+        IF material+0(2) EQ '12'.
+          headdata-matl_type = 'ZPKG'.
+        ELSE.
+          headdata-matl_type = 'ZRAW'.
+        ENDIF.
+        headdata-basic_view = 'X'.
+        headdata-sales_view = 'X'.
+
+        CLEAR clientdata.
+        clientdata-trans_grp = '0001'.
+
+        CLEAR clientdatax.
+        clientdatax-trans_grp = 'X'.
+
+        CLEAR plantdata.
+        plantdata-plant = p_werks.
+        plantdata-loadinggrp = 'Z001'.
+
+        CLEAR plantdatax.
+        plantdatax-plant = p_werks.
+        plantdatax-loadinggrp = 'X'.
+
+        CLEAR salesdata.
+        salesdata-sales_org = p_vkorg.
+        salesdata-distr_chan = p_vtweg.
+        salesdata-item_cat = 'NORM'.
+
+        CLEAR salesdatax.
+        salesdatax-sales_org = p_vkorg.
+        salesdatax-distr_chan = p_vtweg.
+        salesdatax-item_cat = 'X'.
+
+        REFRESH: taxclassifications[].
+        CLEAR: taxclassifications.
+        CALL FUNCTION 'STEUERTAB_IDENTIFY'
+          EXPORTING
+*           KZRFB                 = ' '
+            vkorg                 = salesdata-sales_org
+            bukrs_vkorg           = salesdata-sales_org
+            vtweg                 = salesdata-distr_chan
+          TABLES
+            steuertab             = steuertab
+          EXCEPTIONS
+            wrong_call            = 1
+            vkorg_bukrs_not_found = 2
+            steuertab_empty       = 3
+            OTHERS                = 4.
+        IF sy-subrc <> 0.
+*Implement suitable error handling here
+        ELSE.
+          taxclassifications-depcountry = 'IN'.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 1.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_1 = steuertab-tatyp.
+            taxclassifications-taxclass_1 = '0'.
+          ENDIF.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 2.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_2 = steuertab-tatyp.
+            taxclassifications-taxclass_2 = '0'.
+          ENDIF.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 3.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_3 = steuertab-tatyp.
+            taxclassifications-taxclass_3 = '0'.
+          ENDIF.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 4.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_4 = steuertab-tatyp.
+            taxclassifications-taxclass_4 = '0'.
+          ENDIF.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 5.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_5 = steuertab-tatyp.
+            taxclassifications-taxclass_5 = '0'.
+          ENDIF.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 6.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_6 = steuertab-tatyp.
+            taxclassifications-taxclass_6 = '0'.
+          ENDIF.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 7.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_7 = steuertab-tatyp.
+            taxclassifications-taxclass_7 = '0'.
+          ENDIF.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 8.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_8 = steuertab-tatyp.
+            taxclassifications-taxclass_8 = '0'.
+          ENDIF.
+          CLEAR steuertab.
+          READ TABLE steuertab INDEX 9.
+          IF steuertab-tatyp IS NOT INITIAL.
+            taxclassifications-tax_type_9 = steuertab-tatyp.
+            taxclassifications-taxclass_9 = '0'.
+          ENDIF.
+          IF taxclassifications IS NOT INITIAL.
+            APPEND taxclassifications.
+          ENDIF.
+        ENDIF.
+
+        CLEAR: return.
+        REFRESH: returnmessages[].
+        CALL FUNCTION 'BAPI_MATERIAL_SAVEDATA'
+          EXPORTING
+            headdata           = headdata
+            clientdata         = clientdata
+            clientdatax        = clientdatax
+            plantdata          = plantdata
+            plantdatax         = plantdatax
+            salesdata          = salesdata
+            salesdatax         = salesdatax
+          IMPORTING
+            return             = return
+          TABLES
+            taxclassifications = taxclassifications
+            returnmessages     = returnmessages.
+
+        READ TABLE returnmessages WITH KEY type = 'E' TRANSPORTING NO FIELDS.
+        IF sy-subrc = 0.
+          LOOP AT returnmessages WHERE type = 'E'.
+            MOVE-CORRESPONDING returnmessages TO wa_errormessages.
+            wa_errormessages-message_v4 = headdata-material.
+            APPEND wa_errormessages TO errormessages.
+            CLEAR: wa_errormessages, returnmessages.
+          ENDLOOP.
+        ELSE.
+          IF return-number = '356' AND return-type = 'S'.
+            CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'.
+            wa_log-matnr = headdata-material.
+            wa_log-msg   = return-message.
+            APPEND wa_log TO it_log.
+            CLEAR wa_log.
+          ENDIF.
+        ENDIF.
+        CLEAR: wa_data.
+      ENDLOOP.
+    ENDIF.
+  ELSE.
+    MESSAGE 'No data found. Please check the log.' TYPE 'I' DISPLAY LIKE 'E'.
+  ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  LOG_OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM log_output .
+* create errormessages header *
+  IF errormessages[] IS NOT INITIAL.
+    PERFORM err_head USING 'TYPE'.
+    PERFORM err_head USING 'ID'.
+    PERFORM err_head USING 'NUMBER'.
+    PERFORM err_head USING 'MESSAGE'.
+    PERFORM err_head USING 'LOG_NO'.
+    PERFORM err_head USING 'LOG_MSG_NO'.
+    PERFORM err_head USING 'MESSAGE_V1'.
+    PERFORM err_head USING 'MESSAGE_V2'.
+    PERFORM err_head USING 'MESSAGE_V3'.
+    PERFORM err_head USING 'MESSAGE_V4'.
+    PERFORM err_head USING 'PARAMETER'.
+    PERFORM err_head USING 'ROW'.
+    PERFORM err_head USING 'FIELD'.
+    PERFORM err_head USING 'SYSTEM'.
+
+* Download return file *
+    PERFORM down_err.
+  ENDIF.
+
+  IF it_log[] IS NOT INITIAL.
+* create log header *
+    PERFORM log_head USING 'MATERIAL'.
+    PERFORM log_head USING 'MESSAGE'.
+
+* Download return file *
+    PERFORM down_log.
+  ENDIF.
+ENDFORM.
+
+*&---------------------------------------------------------------------*
+*&      Form  RET_HEAD
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_0424   text
+*----------------------------------------------------------------------*
+FORM err_head  USING    VALUE(p_name).
+  CLEAR wa_errfname.
+  wa_errfname-fieldname = p_name.
+  APPEND wa_errfname TO it_errfname.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  LOG_HEAD
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_0480   text
+*----------------------------------------------------------------------*
+FORM log_head  USING    VALUE(p_name).
+  CLEAR wa_logfname.
+  wa_logfname-fieldname = p_name.
+  APPEND wa_logfname TO it_logfname.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  DOWN_RET
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM down_err .
+  CLEAR: file, path, file_path, title, defname, defext.
+  title = 'Save error log'.
+  defname = 'material_extend_error_log.xls'.
+  defext = 'xls'.
+  CALL METHOD cl_gui_frontend_services=>file_save_dialog
+    EXPORTING
+      window_title      = title
+      default_file_name = defname
+      default_extension = defext
+    CHANGING
+      filename          = file
+      path              = path
+      fullpath          = file_path.
+
+  CALL METHOD cl_gui_frontend_services=>gui_download
+    EXPORTING
+      filename              = file_path
+      write_field_separator = 'X'
+      fieldnames            = it_errfname
+    CHANGING
+      data_tab              = errormessages.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  DOWN_LOG
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM down_log .
+  CLEAR: file, path, file_path, title, defname, defext.
+  title = 'Save status log'.
+  defname = 'material_extend_log.xls'.
+  defext = 'xls'.
+  CALL METHOD cl_gui_frontend_services=>file_save_dialog
+    EXPORTING
+      window_title      = title
+      default_file_name = defname
+      default_extension = defext
+    CHANGING
+      filename          = file
+      path              = path
+      fullpath          = file_path.
+
+  CALL METHOD cl_gui_frontend_services=>gui_download
+    EXPORTING
+      filename              = file_path
+      write_field_separator = 'X'
+      fieldnames            = it_logfname
+    CHANGING
+      data_tab              = it_log.
+ENDFORM.

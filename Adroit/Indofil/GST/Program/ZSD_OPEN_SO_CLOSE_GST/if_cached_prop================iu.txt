@@ -1,0 +1,25 @@
+*" components of interface IF_CACHED_PROP
+interface IF_CACHED_PROP
+  public .
+
+
+*" methods
+methods:
+  GET_NEXT_PROP
+      exporting
+        PROPNAME type STRING
+        PROPVALUE type STRING
+      exceptions
+        NO_MORE_PROPS ,
+  SEEK_FIRST_PROP
+      exceptions
+        ERROR_SEEK_FIRST ,
+  SET_PROP
+      importing
+        PROPNAME type STRING
+        PROPVALUE type STRING
+      exceptions
+        PROP_NOT_FOUND
+        INVALID_NAME
+        ERROR_SET_PROPERTY .
+endinterface.
