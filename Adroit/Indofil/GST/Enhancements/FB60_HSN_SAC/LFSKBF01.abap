@@ -13,8 +13,13 @@ AND ( sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65' OR sy-tcode EQ 'FB70' OR sy-tcode
         lv_count TYPE i.
 
   UNASSIGN: <budat>, <gstpart>.
-  ASSIGN ('(SAPLJ_1IG_VENDOR_SUBSCR)INVFO-BUDAT') TO <budat> .
-  ASSIGN ('(SAPLJ_1IG_VENDOR_SUBSCR)INVFO-GST_PART') TO <gstpart> .
+  IF sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65'.
+    ASSIGN ('(SAPLJ_1IG_VENDOR_SUBSCR)INVFO-BUDAT') TO <budat> .
+    ASSIGN ('(SAPLJ_1IG_VENDOR_SUBSCR)INVFO-GST_PART') TO <gstpart> .
+  ELSEIF sy-tcode EQ 'FB70' OR sy-tcode EQ 'FB75'.
+    ASSIGN ('(SAPLJ_1IG_CUSTOMER_SUBSCR)INVFO-BUDAT') TO <budat> .
+    ASSIGN ('(SAPLJ_1IG_CUSTOMER_SUBSCR)INVFO-GST_PART') TO <gstpart> .
+  ENDIF.
 
   CLEAR: gstpart, budat.
   REFRESH: it_hac[].
