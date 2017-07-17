@@ -13,14 +13,14 @@ IF ( sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65' OR sy-tcode EQ 'FB70' OR sy-tcode 
   TYPES: BEGIN OF ty_hsnhlp,
            lifnr    TYPE zgst_vsac-lifnr,
            hsn_sac  TYPE zgst_vsac-hsn_sac,
-           vtext    TYPE zhsn_sac-vtext,
+           vtext    TYPE j_1ichidtx-j_1icht1,
          END OF ty_hsnhlp.
 
   DATA: it_vsac TYPE TABLE OF zgst_vsac,
         wa_vsac TYPE zgst_vsac,
 
-        it_sac TYPE TABLE OF zhsn_sac,
-        wa_sac TYPE zhsn_sac,
+        it_sac TYPE TABLE OF j_1ichidtx,
+        wa_sac TYPE j_1ichidtx,
 
         it_hsnhlp TYPE TABLE OF ty_hsnhlp,
         wa_hsnhlp TYPE ty_hsnhlp,
@@ -71,7 +71,7 @@ IF ( sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65' OR sy-tcode EQ 'FB70' OR sy-tcode 
 *          WHERE lifnr EQ accnt.
       ENDIF.
 
-    IF gstpart IS NOT INITIAL AND budat GT '20170630' AND accgrp NE 'EMPL'.
+    IF gstpart IS NOT INITIAL AND budat GT '20170630' AND ( accgrp NE 'EMPL' AND accgrp NE '2000' ).
       SELECT *
         FROM zgst_vsac
         INTO TABLE it_vsac
@@ -79,19 +79,20 @@ IF ( sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65' OR sy-tcode EQ 'FB70' OR sy-tcode 
 
       IF sy-subrc = 0 AND it_vsac IS NOT INITIAL.
         SELECT *
-          FROM zhsn_sac
+          FROM j_1ichidtx
           INTO TABLE it_sac
           FOR ALL ENTRIES IN it_vsac
-          WHERE hsn_sac = it_vsac-hsn_sac.
+          WHERE j_1ichid = it_vsac-hsn_sac
+          AND   langu EQ sy-langu.
       ENDIF.
 
       IF it_vsac[] IS NOT INITIAL AND it_sac[] IS NOT INITIAL.
         LOOP AT it_vsac INTO wa_vsac.
           wa_hsnhlp-lifnr   = wa_vsac-lifnr.
           wa_hsnhlp-hsn_sac = wa_vsac-hsn_sac.
-          READ TABLE it_sac INTO wa_sac WITH KEY hsn_sac = wa_vsac-hsn_sac.
+          READ TABLE it_sac INTO wa_sac WITH KEY j_1ichid = wa_vsac-hsn_sac.
           IF sy-subrc = 0.
-            wa_hsnhlp-vtext = wa_sac-vtext.
+            wa_hsnhlp-vtext = wa_sac-j_1icht1.
           ENDIF.
 
           APPEND wa_hsnhlp TO it_hsnhlp.
@@ -103,7 +104,7 @@ IF ( sy-tcode EQ 'FB60' OR sy-tcode EQ 'FB65' OR sy-tcode EQ 'FB70' OR sy-tcode 
 
   IF it_hsnhlp[] IS NOT INITIAL.
     CLEAR title.
-    title = 'Value for HSN_SAC'.
+    CONCATENATE 'HSN_SAC for GST Partner' gstpart INTO title SEPARATED BY space.
 
     REFRESH: it_shret[].
     CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
