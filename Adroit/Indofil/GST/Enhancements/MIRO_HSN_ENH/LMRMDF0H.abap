@@ -1,4 +1,5 @@
 .....
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""$"$\SE:(1) Form T_DRSEG_AUFBAUEN_PRUEFEN_1, End                                                                                                              A
 *$*$-Start: (1)---------------------------------------------------------------------------------$*$*
 ENHANCEMENT 1  ZMM_HSNCODE_MIRO.    "active version
@@ -36,9 +37,19 @@ IF sy-tcode EQ 'MIRO'.  " Code on tcode? Do we need post. date as well?
             AND w_drseg-txz01 IS NOT INITIAL AND w_drseg-srvpos IS INITIAL AND w_drseg-hsn_sac IS INITIAL.
             READ TABLE it_poview INTO wa_poview WITH KEY ebeln_i = w_drseg-ebeln ebelp_i = w_drseg-ebelp.
             IF sy-subrc = 0.
-              IF ( wa_poview-bsart EQ 'IBDO' OR wa_poview-bsart EQ 'IBSD' OR wa_poview-bsart EQ 'IBSI' OR wa_poview-bsart EQ 'IBDO' OR
-                wa_poview-bsart EQ 'YSED' OR wa_poview-bsart EQ 'YSEI' OR wa_poview-bsart EQ 'ZSED' OR wa_poview-bsart EQ 'ZSEI' )
-                AND w_drseg-knttp EQ 'K'. " => This is a service PO, txz01 is description of service
+              IF
+*                (
+*                   wa_poview-bsart EQ 'IBDO'
+*                OR wa_poview-bsart EQ 'IBSD'
+*                OR wa_poview-bsart EQ 'IBSI'
+*                OR wa_poview-bsart EQ 'IBDO'
+*                OR wa_poview-bsart EQ 'YSED'
+*                OR wa_poview-bsart EQ 'YSEI'
+*                OR wa_poview-bsart EQ 'ZSED'
+*                OR wa_poview-bsart EQ 'ZSEI'
+*                )
+*                AND
+                wa_poview-knttp_i EQ 'K' AND wa_poview-pstyp_i EQ '9'. " => This is a service PO, txz01 is description of service
                 SELECT SINGLE sub_packno
                   FROM esll
                   INTO subpackno
