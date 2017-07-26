@@ -8,8 +8,7 @@ CALL METHOD im_header->get_items
       re_items = l_items.
 *{   INSERT         IRPK900480                                        6
 
-
-  IF ls_header-bsart = 'ZSTO' OR ls_header-bsart = 'YSTO' .
+IF ls_header-bsart = 'ZSTO' OR ls_header-bsart = 'YSTO' .
 
     DATA: it_eina TYPE TABLE OF eina,
           wa_eina TYPE eina,
@@ -46,7 +45,7 @@ CALL METHOD im_header->get_items
 
       IF v_supplnt IS NOT INITIAL.
         CLEAR v_gstno.
-        SELECT single stcd3
+        SELECT SINGLE stcd3
           FROM kna1
           INTO v_gstno
           WHERE kunnr = v_supplnt.
@@ -59,7 +58,7 @@ CALL METHOD im_header->get_items
 
       IF v_recplnt IS NOT INITIAL.
         CLEAR v_gstno.
-        SELECT single stcd3
+        SELECT SINGLE stcd3
           FROM kna1
           INTO v_gstno
           WHERE kunnr = v_recplnt.
@@ -74,7 +73,8 @@ CALL METHOD im_header->get_items
         FROM eina
         INTO TABLE it_eina
         WHERE matnr = l_items_header-matnr
-        AND   lifnr = lv_reswk.
+        AND   lifnr = lv_reswk
+        AND   loekz NE 'X'.
 
       IF sy-subrc = 0 AND it_eina IS NOT INITIAL.
         SELECT *
@@ -83,7 +83,8 @@ CALL METHOD im_header->get_items
           FOR ALL ENTRIES IN it_eina
           WHERE infnr = it_eina-infnr
           AND   ekorg = ls_header-ekorg
-          AND   werks = l_items_header-werks.
+          AND   werks = l_items_header-werks
+          AND   loekz NE 'X'.
       ENDIF.
 
       IF it_eine[] IS INITIAL.
