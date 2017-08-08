@@ -1,0 +1,81 @@
+class CL_MESSAGE_HELPER definition
+  public
+  final
+  create private .
+
+public section.
+*"* public components of class CL_MESSAGE_HELPER
+*"* do not include other source files here!!!
+
+  class-data MESSAGE_OBJECT type ref to IF_MESSAGE .
+
+  type-pools ABAP .
+  class-methods GET_LONGTEXT_FOR_MESSAGE
+    importing
+      value(TEXT) type ref to IF_MESSAGE
+      value(PRESERVE_NEWLINES) type ABAP_BOOL optional
+      value(T100_PREPEND_SHORT) type ABAP_BOOL default 'X'
+    returning
+      value(RESULT) type STRING .
+  class-methods GET_TEXT_FOR_MESSAGE
+    importing
+      value(TEXT) type ref to IF_MESSAGE
+    returning
+      value(RESULT) type STRING .
+  class-methods SET_MSG_VARS_FOR_CLIKE
+    importing
+      value(TEXT) type CLIKE .
+  class-methods SET_MSG_VARS_FOR_IF_T100_MSG
+    importing
+      value(TEXT) type ref to IF_T100_MESSAGE
+    raising
+      CX_SY_MESSAGE_ILLEGAL_TEXT .
+  class-methods SET_MSG_VARS_FOR_ANY
+    importing
+      !TEXT type ANY
+    exporting
+      value(STRING) type STRING
+    raising
+      CX_SY_MESSAGE_ILLEGAL_TEXT .
+  class-methods SET_MSG_VARS_FOR_IF_MSG
+    importing
+      value(TEXT) type ref to IF_MESSAGE
+    exporting
+      value(STRING) type STRING
+    raising
+      CX_SY_MESSAGE_ILLEGAL_TEXT .
+  class-methods CHECK_MSG_KIND
+    importing
+      value(MSG) type ref to IF_MESSAGE
+    exporting
+      value(T100KEY) type SCX_T100KEY
+      value(TEXTID) type SOTR_CONC .
+  class-methods GET_TEXT_PARAMS
+    importing
+      value(OBJ) type ref to OBJECT
+    exporting
+      !PARAMS type SOTR_PARAMS .
+  class-methods GET_OTR_TEXT_RAW
+    importing
+      !TEXTID type SOTR_CONC
+    exporting
+      !RESULT type STRING .
+  class-methods GET_T100_TEXT_FOR
+    importing
+      value(OBJ) type ref to OBJECT
+      !T100KEY type SCX_T100KEY
+    exporting
+      !RESULT type STRING .
+  class-methods REPLACE_TEXT_PARAMS
+    importing
+      value(OBJ) type ref to OBJECT
+    changing
+      !RESULT type STRING .
+  class-methods STRIP_NEWLINES_FROM
+    changing
+      !MESSAGE type STRING .
+  class-methods GET_TEXT_SPARAMS
+    importing
+      value(OBJ) type ref to OBJECT
+    exporting
+      !PARAMS type SBTFR_PARAM_TT .

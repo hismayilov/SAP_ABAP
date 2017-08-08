@@ -1,0 +1,123 @@
+class CL_ABAP_TYPEDESCR definition
+  public
+  abstract
+  create public
+
+  global friends CL_ABAP_DATA_TYPE_HANDLE
+                 CL_ABAP_REFDESCR .
+
+public section.
+
+*"* public components of class CL_ABAP_TYPEDESCR
+*"* do not include other source files here!!!
+*"* protected components of class CL_ABAP_TYPEDESCR
+*"* do not include other source files here!!!
+  type-pools ABAP .
+  data ABSOLUTE_NAME type ABAP_ABSTYPENAME read-only .
+  data DECIMALS type I read-only .
+  constants FALSE type ABAP_BOOL value ABAP_FALSE. "#EC NOTEXT
+  data KIND type ABAP_TYPECATEGORY read-only .
+  data LENGTH type I read-only .
+  data TYPE_KIND type ABAP_TYPEKIND read-only .
+  constants KIND_CLASS type ABAP_TYPECATEGORY value 'C'. "#EC NOTEXT
+  constants KIND_ELEM type ABAP_TYPECATEGORY value 'E'. "#EC NOTEXT
+  constants KIND_INTF type ABAP_TYPECATEGORY value 'I'. "#EC NOTEXT
+  constants KIND_REF type ABAP_TYPECATEGORY value 'R'. "#EC NOTEXT
+  constants KIND_STRUCT type ABAP_TYPECATEGORY value 'S'. "#EC NOTEXT
+  constants KIND_TABLE type ABAP_TYPECATEGORY value 'T'. "#EC NOTEXT
+  constants TRUE type ABAP_BOOL value ABAP_TRUE. "#EC NOTEXT
+  constants TYPEKIND_ANY type ABAP_TYPEKIND value '~'. "#EC NOTEXT
+  constants TYPEKIND_CHAR type ABAP_TYPEKIND value 'C'. "#EC NOTEXT
+  constants TYPEKIND_CLASS type ABAP_TYPEKIND value '*'. "#EC NOTEXT
+  constants TYPEKIND_CLIKE type ABAP_TYPEKIND value '&'. "#EC NOTEXT
+  constants TYPEKIND_CSEQUENCE type ABAP_TYPEKIND value '?'. "#EC NOTEXT
+  constants TYPEKIND_DATA type ABAP_TYPEKIND value '#'. "#EC NOTEXT
+  constants TYPEKIND_DATE type ABAP_TYPEKIND value 'D'. "#EC NOTEXT
+  constants TYPEKIND_DECFLOAT type ABAP_TYPEKIND value '/'. "#EC NOTEXT
+  constants TYPEKIND_DECFLOAT16 type ABAP_TYPEKIND value 'a'. "#EC NOTEXT
+  constants TYPEKIND_DECFLOAT34 type ABAP_TYPEKIND value 'e'. "#EC NOTEXT
+  constants TYPEKIND_DREF type ABAP_TYPEKIND value 'l'. "#EC NOTEXT
+  constants TYPEKIND_FLOAT type ABAP_TYPEKIND value 'F'. "#EC NOTEXT
+  constants TYPEKIND_HEX type ABAP_TYPEKIND value 'X'. "#EC NOTEXT
+  constants TYPEKIND_INT type ABAP_TYPEKIND value 'I'. "#EC NOTEXT
+  constants TYPEKIND_INT1 type ABAP_TYPEKIND value 'b'. "#EC NOTEXT
+  constants TYPEKIND_INT2 type ABAP_TYPEKIND value 's'. "#EC NOTEXT
+  constants TYPEKIND_INTF type ABAP_TYPEKIND value '+'. "#EC NOTEXT
+  constants TYPEKIND_IREF type ABAP_TYPEKIND value 'm'. "#EC NOTEXT
+  constants TYPEKIND_NUM type ABAP_TYPEKIND value 'N'. "#EC NOTEXT
+  constants TYPEKIND_NUMERIC type ABAP_TYPEKIND value '%'. "#EC NOTEXT
+  constants TYPEKIND_OREF type ABAP_TYPEKIND value 'r'. "#EC NOTEXT
+  constants TYPEKIND_PACKED type ABAP_TYPEKIND value 'P'. "#EC NOTEXT
+  constants TYPEKIND_SIMPLE type ABAP_TYPEKIND value '$'. "#EC NOTEXT
+  constants TYPEKIND_STRING type ABAP_TYPEKIND value 'g'. "#EC NOTEXT
+  constants TYPEKIND_STRUCT1 type ABAP_TYPEKIND value 'u'. "#EC NOTEXT
+  constants TYPEKIND_STRUCT2 type ABAP_TYPEKIND value 'v'. "#EC NOTEXT
+  constants TYPEKIND_TABLE type ABAP_TYPEKIND value 'h'. "#EC NOTEXT
+  constants TYPEKIND_TIME type ABAP_TYPEKIND value 'T'. "#EC NOTEXT
+  constants TYPEKIND_W type ABAP_TYPEKIND value 'w'. "#EC NOTEXT
+  constants TYPEKIND_XSEQUENCE type ABAP_TYPEKIND value '!'. "#EC NOTEXT
+  constants TYPEKIND_XSTRING type ABAP_TYPEKIND value 'y'. "#EC NOTEXT
+  constants TYPEKIND_BREF type ABAP_TYPEKIND value 'j'. "#EC NOTEXT
+  constants TYPEPROPKIND_DBMAXLEN type ABAP_TYPEPROPKIND value 'D'. "#EC NOTEXT
+  constants TYPEPROPKIND_HASCLIENT type ABAP_TYPEPROPKIND value 'C'. "#EC NOTEXT
+  constants UNDEFINED type ABAP_BOOL value ABAP_UNDEFINED. "#EC NOTEXT
+
+  class-methods DESCRIBE_BY_DATA
+    importing
+      !P_DATA type ANY
+    returning
+      value(P_DESCR_REF) type ref to CL_ABAP_TYPEDESCR .
+  class-methods DESCRIBE_BY_NAME
+    importing
+      !P_NAME type ANY
+    returning
+      value(P_DESCR_REF) type ref to CL_ABAP_TYPEDESCR
+    exceptions
+      TYPE_NOT_FOUND .
+  class-methods DESCRIBE_BY_OBJECT_REF
+    importing
+      !P_OBJECT_REF type ref to OBJECT
+    returning
+      value(P_DESCR_REF) type ref to CL_ABAP_TYPEDESCR
+    exceptions
+      REFERENCE_IS_INITIAL .
+  class-methods DESCRIBE_BY_DATA_REF
+    importing
+      !P_DATA_REF type ref to DATA
+    returning
+      value(P_DESCR_REF) type ref to CL_ABAP_TYPEDESCR
+    exceptions
+      REFERENCE_IS_INITIAL .
+  methods GET_PROPERTY
+    importing
+      !P_PROPERTY_KIND type ABAP_TYPEPROPKIND
+    returning
+      value(P_VALUE) type ref to DATA .
+  methods GET_RELATIVE_NAME
+    returning
+      value(P_RELATIVE_NAME) type STRING .
+  methods IS_DDIC_TYPE
+    returning
+      value(P_ABAP_BOOL) type ABAP_BOOL .
+  methods GET_DDIC_HEADER
+    returning
+      value(P_HEADER) type X030L
+    exceptions
+      NOT_FOUND
+      NO_DDIC_TYPE .
+  methods GET_DDIC_OBJECT
+    returning
+      value(P_OBJECT) type DD_X031L_TABLE
+    exceptions
+      NOT_FOUND
+      NO_DDIC_TYPE .
+  methods HAS_PROPERTY
+    importing
+      !P_PROPERTY_KIND type ABAP_TYPEPROPKIND
+    returning
+      value(P_ABAP_BOOL) type ABAP_BOOL .
+  class-methods CLASS_CONSTRUCTOR .
+  methods IS_INSTANTIATABLE
+  abstract
+    returning
+      value(P_RESULT) type ABAP_BOOL .

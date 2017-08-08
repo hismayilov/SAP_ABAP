@@ -1,0 +1,28 @@
+class CX_SALV_ERROR definition
+  public
+  inheriting from CX_STATIC_CHECK
+  create public .
+
+*"* public components of class CX_SALV_ERROR
+*"* do not include other source files here!!!
+public section.
+
+  interfaces IF_ALV_MESSAGE .
+
+  aliases GET_MESSAGE
+    for IF_ALV_MESSAGE~GET_MESSAGE .
+
+  constants:
+    begin of CX_SALV_ERROR,
+      msgid type symsgid value 'SALV_EXCEPTION',
+      msgno type symsgno value '899',
+      attr1 type scx_attrname value '',
+      attr2 type scx_attrname value '',
+      attr3 type scx_attrname value '',
+      attr4 type scx_attrname value '',
+    end of CX_SALV_ERROR .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional .

@@ -1,0 +1,16 @@
+class CX_SY_TYPE_CREATION definition
+  public
+  inheriting from CX_DYNAMIC_CHECK
+  create public .
+
+*"* public components of class CX_SY_TYPE_CREATION
+*"* do not include other source files here!!!
+public section.
+
+  constants CX_SY_TYPE_CREATION type SOTR_CONC
+ value '726C513F9E6BF03DE10000000A114BF5'. "#EC NOTEXT
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional .

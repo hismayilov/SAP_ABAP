@@ -1,0 +1,19 @@
+class CX_SY_STRUCT_CREATION definition
+  public
+  inheriting from CX_SY_TYPE_CREATION
+  create public .
+
+*"* public components of class CX_SY_STRUCT_CREATION
+*"* do not include other source files here!!!
+public section.
+
+  constants CX_SY_STRUCT_CREATION type SOTR_CONC value '4A6F5C3FBB673E2FE10000000A114BF5'. "#EC NOTEXT
+  data COMPONENT_NAME type STRING read-only .
+  data COMPONENT_NUMBER type I read-only .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional
+      !COMPONENT_NAME type STRING optional
+      !COMPONENT_NUMBER type I optional .

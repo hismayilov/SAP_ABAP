@@ -1,0 +1,726 @@
+class CL_GUI_FRONTEND_SERVICES definition
+  public
+  inheriting from CL_GUI_OBJECT
+  final
+  create public .
+
+public section.
+
+  constants HKEY_CLASSES_ROOT type I value 0. "#EC NOTEXT
+  constants HKEY_CURRENT_USER type I value 1. "#EC NOTEXT
+  constants HKEY_LOCAL_MACHINE type I value 2. "#EC NOTEXT
+  constants HKEY_USERS type I value 3. "#EC NOTEXT
+  constants PLATFORM_UNKNOWN type I value -1. "#EC NOTEXT
+  constants PLATFORM_WINDOWS95 type I value 1. "#EC NOTEXT
+  constants PLATFORM_WINDOWS98 type I value 2. "#EC NOTEXT
+  constants PLATFORM_NT351 type I value 3. "#EC NOTEXT
+  constants PLATFORM_NT40 type I value 4. "#EC NOTEXT
+  constants PLATFORM_NT50 type I value 5. "#EC NOTEXT
+  constants PLATFORM_MAC type I value 6. "#EC NOTEXT
+  constants PLATFORM_OS2 type I value 7. "#EC NOTEXT
+  constants PLATFORM_LINUX type I value 8. "#EC NOTEXT
+  constants PLATFORM_HPUX type I value 9. "#EC NOTEXT
+  constants PLATFORM_TRU64 type I value 10. "#EC NOTEXT
+  constants PLATFORM_AIX type I value 11. "#EC NOTEXT
+  constants PLATFORM_SOLARIS type I value 12. "#EC NOTEXT
+  constants PLATFORM_MACOSX type I value 13. "#EC NOTEXT
+  constants ACTION_OK type I value 0. "#EC NOTEXT
+  constants ACTION_CANCEL type I value 9. "#EC NOTEXT
+  class-data FILETYPE_ALL type STRING read-only .
+  class-data FILETYPE_TEXT type STRING read-only .
+  class-data FILETYPE_XML type STRING read-only .
+  class-data FILETYPE_HTML type STRING read-only .
+  class-data FILETYPE_EXCEL type STRING read-only .
+  class-data FILETYPE_RTF type STRING read-only .
+  class-data FILETYPE_WORD type STRING read-only .
+  class-data FILETYPE_POWERPOINT type STRING read-only .
+  constants PLATFORM_WINDOWSXP type I value 14. "#EC NOTEXT
+  constants ACTION_APPEND type I value 1. "#EC NOTEXT
+  constants ACTION_REPLACE type I value 2. "#EC NOTEXT
+
+  type-pools ABAP .
+  class-methods CHECK_GUI_SUPPORT
+    importing
+      !COMPONENT type STRING optional
+      !FEATURE_NAME type STRING optional
+    returning
+      value(RESULT) type ABAP_BOOL
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      WRONG_PARAMETER
+      NOT_SUPPORTED_BY_GUI
+      UNKNOWN_ERROR .
+  class-methods CLASS_CONSTRUCTOR .
+  class-methods CLIPBOARD_EXPORT
+    importing
+      !NO_AUTH_CHECK type CHAR01 default SPACE
+    exporting
+      !DATA type STANDARD TABLE
+    changing
+      !RC type I
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      NO_AUTHORITY .
+  class-methods CLIPBOARD_IMPORT
+    exporting
+      !DATA type STANDARD TABLE
+      !LENGTH type I
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  methods CONSTRUCTOR
+    exceptions
+      NOT_SUPPORTED_BY_GUI
+      CNTL_ERROR .
+  class-methods DIRECTORY_BROWSE
+    importing
+      value(WINDOW_TITLE) type STRING optional
+      value(INITIAL_FOLDER) type STRING optional
+    changing
+      !SELECTED_FOLDER type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods DIRECTORY_CREATE
+    importing
+      value(DIRECTORY) type STRING
+    changing
+      !RC type I
+    exceptions
+      DIRECTORY_CREATE_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      DIRECTORY_ACCESS_DENIED
+      DIRECTORY_ALREADY_EXISTS
+      PATH_NOT_FOUND
+      UNKNOWN_ERROR
+      NOT_SUPPORTED_BY_GUI
+      WRONG_PARAMETER .
+  class-methods DIRECTORY_DELETE
+    importing
+      value(DIRECTORY) type STRING
+    changing
+      !RC type I
+    exceptions
+      DIRECTORY_DELETE_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      PATH_NOT_FOUND
+      DIRECTORY_ACCESS_DENIED
+      UNKNOWN_ERROR
+      NOT_SUPPORTED_BY_GUI
+      WRONG_PARAMETER .
+  class-methods DIRECTORY_EXIST
+    importing
+      !DIRECTORY type STRING
+    returning
+      value(RESULT) type ABAP_BOOL
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      WRONG_PARAMETER
+      NOT_SUPPORTED_BY_GUI .
+  class-methods DIRECTORY_GET_CURRENT
+    changing
+      !CURRENT_DIRECTORY type STRING
+    exceptions
+      DIRECTORY_GET_CURRENT_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods DIRECTORY_LIST_FILES
+    importing
+      value(DIRECTORY) type STRING
+      value(FILTER) type STRING default '*.*'
+      value(FILES_ONLY) type ABAP_BOOL optional
+      value(DIRECTORIES_ONLY) type ABAP_BOOL optional
+    changing
+      !FILE_TABLE type STANDARD TABLE
+      !COUNT type I
+    exceptions
+      CNTL_ERROR
+      DIRECTORY_LIST_FILES_FAILED
+      WRONG_PARAMETER
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods DIRECTORY_SET_CURRENT
+    importing
+      value(CURRENT_DIRECTORY) type STRING
+    changing
+      !RC type I
+    exceptions
+      DIRECTORY_SET_CURRENT_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods DISABLEHISTORYFORFIELD
+    importing
+      value(FIELDNAME) type STRING
+      value(BDISABLED) type ABAP_BOOL
+    changing
+      value(RC) type I
+    exceptions
+      FIELD_NOT_FOUND
+      DISABLEHISTORYFORFIELD_FAILED
+      CNTL_ERROR
+      UNABLE_TO_DISABLE_FIELD
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods ENVIRONMENT_GET_VARIABLE
+    importing
+      value(VARIABLE) type STRING
+    changing
+      !VALUE type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods ENVIRONMENT_SET_VARIABLE
+    importing
+      value(VARIABLE) type STRING
+      value(VALUE) type STRING
+    changing
+      !RC type I
+    exceptions
+      ENVIRONMENT_SET_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      WRONG_PARAMETER .
+  class-methods EXECUTE
+    importing
+      value(DOCUMENT) type STRING optional
+      value(APPLICATION) type STRING optional
+      value(PARAMETER) type STRING optional
+      value(DEFAULT_DIRECTORY) type STRING optional
+      value(MAXIMIZED) type STRING optional
+      value(MINIMIZED) type STRING optional
+      value(SYNCHRONOUS) type STRING optional
+      value(OPERATION) type STRING default 'OPEN'
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      BAD_PARAMETER
+      FILE_NOT_FOUND
+      PATH_NOT_FOUND
+      FILE_EXTENSION_UNKNOWN
+      ERROR_EXECUTE_FAILED
+      SYNCHRONOUS_FAILED
+      NOT_SUPPORTED_BY_GUI .
+  class-methods FILE_COPY
+    importing
+      value(SOURCE) type STRING
+      value(DESTINATION) type STRING
+      value(OVERWRITE) type ABAP_BOOL default SPACE
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      WRONG_PARAMETER
+      DISK_FULL
+      ACCESS_DENIED
+      FILE_NOT_FOUND
+      DESTINATION_EXISTS
+      UNKNOWN_ERROR
+      PATH_NOT_FOUND
+      DISK_WRITE_PROTECT
+      DRIVE_NOT_READY
+      NOT_SUPPORTED_BY_GUI .
+  class-methods FILE_DELETE
+    importing
+      value(FILENAME) type STRING
+    changing
+      !RC type I
+    exceptions
+      FILE_DELETE_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      FILE_NOT_FOUND
+      ACCESS_DENIED
+      UNKNOWN_ERROR
+      NOT_SUPPORTED_BY_GUI
+      WRONG_PARAMETER .
+  class-methods FILE_EXIST
+    importing
+      value(FILE) type STRING
+    returning
+      value(RESULT) type ABAP_BOOL
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      WRONG_PARAMETER
+      NOT_SUPPORTED_BY_GUI .
+  class-methods FILE_GET_ATTRIBUTES
+    importing
+      !FILENAME type STRING
+    exporting
+      !READONLY type ABAP_BOOL
+      !NORMAL type ABAP_BOOL
+      !HIDDEN type ABAP_BOOL
+      !ARCHIVE type ABAP_BOOL
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      WRONG_PARAMETER
+      FILE_GET_ATTRIBUTES_FAILED .
+  class-methods FILE_GET_SIZE
+    importing
+      value(FILE_NAME) type STRING
+    exporting
+      !FILE_SIZE type I
+    exceptions
+      FILE_GET_SIZE_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      INVALID_DEFAULT_FILE_NAME .
+  class-methods FILE_GET_VERSION
+    importing
+      value(FILENAME) type STRING
+    changing
+      !VERSION type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      WRONG_PARAMETER .
+  class-methods FILE_OPEN_DIALOG
+    importing
+      value(WINDOW_TITLE) type STRING optional
+      value(DEFAULT_EXTENSION) type STRING optional
+      value(DEFAULT_FILENAME) type STRING optional
+      value(FILE_FILTER) type STRING optional
+      value(WITH_ENCODING) type ABAP_BOOL optional
+      value(INITIAL_DIRECTORY) type STRING optional
+      value(MULTISELECTION) type ABAP_BOOL optional
+    changing
+      !FILE_TABLE type FILETABLE
+      !RC type I
+      !USER_ACTION type I optional
+      !FILE_ENCODING type ABAP_ENCODING optional
+    exceptions
+      FILE_OPEN_DIALOG_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods FILE_SAVE_DIALOG
+    importing
+      value(WINDOW_TITLE) type STRING optional
+      value(DEFAULT_EXTENSION) type STRING optional
+      value(DEFAULT_FILE_NAME) type STRING optional
+      !WITH_ENCODING type ABAP_BOOL optional
+      value(FILE_FILTER) type STRING optional
+      value(INITIAL_DIRECTORY) type STRING optional
+      !PROMPT_ON_OVERWRITE type ABAP_BOOL default 'X'
+    changing
+      !FILENAME type STRING
+      !PATH type STRING
+      !FULLPATH type STRING
+      !USER_ACTION type I optional
+      !FILE_ENCODING type ABAP_ENCODING optional
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      INVALID_DEFAULT_FILE_NAME .
+  class-methods FILE_SET_ATTRIBUTES
+    importing
+      !FILENAME type STRING
+      !READONLY type ABAP_BOOL optional
+      !NORMAL type ABAP_BOOL optional
+      !HIDDEN type ABAP_BOOL optional
+      !ARCHIVE type ABAP_BOOL optional
+    exporting
+      !RC type I
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      WRONG_PARAMETER .
+  class-methods GET_COMPUTER_NAME
+    changing
+      !COMPUTER_NAME type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_DESKTOP_DIRECTORY
+    changing
+      !DESKTOP_DIRECTORY type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_DRIVE_FREE_SPACE_MEGABYTE
+    importing
+      value(DRIVE) type STRING default 'C:\'
+    changing
+      !FREE_SPACE type STRING
+    exceptions
+      CNTL_ERROR
+      GET_FREE_SPACE_FAILED
+      ERROR_NO_GUI
+      WRONG_PARAMETER
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_DRIVE_TYPE
+    importing
+      value(DRIVE) type STRING
+    changing
+      !DRIVE_TYPE type STRING
+    exceptions
+      CNTL_ERROR
+      BAD_PARAMETER
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_FILE_SEPARATOR
+    changing
+      value(FILE_SEPARATOR) type C
+    exceptions
+      NOT_SUPPORTED_BY_GUI
+      ERROR_NO_GUI
+      CNTL_ERROR .
+  class-methods GET_FREE_SPACE_FOR_DRIVE
+    importing
+      value(DRIVE) type STRING
+    changing
+      !FREE_SPACE type I
+    exceptions
+      CNTL_ERROR
+      GET_FREE_SPACE_FAILED
+      ERROR_NO_GUI
+      WRONG_PARAMETER
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_GUI_PROPERTIES
+    changing
+      !STREAM type STRING
+    exceptions
+      CNTL_ERROR
+      GET_GUI_PROPERTIES_FAILED
+      ERROR_NO_GUI
+      WRONG_PARAMETER
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_GUI_VERSION
+    changing
+      !VERSION_TABLE type FILETABLE
+      !RC type I
+    exceptions
+      GET_GUI_VERSION_FAILED
+      CANT_WRITE_VERSION_TABLE
+      GUI_NO_VERSION
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_IP_ADDRESS
+    returning
+      value(IP_ADDRESS) type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_LF_FOR_DESTINATION_GUI
+    changing
+      !LINEFEED type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_PLATFORM
+    returning
+      value(PLATFORM) type I
+    exceptions
+      ERROR_NO_GUI
+      CNTL_ERROR
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_SAPGUI_DIRECTORY
+    changing
+      !SAPGUI_DIRECTORY type STRING
+    exceptions
+      CNTL_ERROR
+      NOT_SUPPORTED_BY_GUI
+      ERROR_NO_GUI .
+  class-methods GET_SAPGUI_WORKDIR
+    changing
+      !SAPWORKDIR type STRING
+    exceptions
+      GET_SAPWORKDIR_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_SAPLOGON_ENCODING
+    changing
+      !FILE_ENCODING type ABAP_ENCODING
+      !RC type I
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      CANNOT_INITIALIZE_GLOBALSTATE .
+  class-methods GET_SYSTEM_DIRECTORY
+    changing
+      !SYSTEM_DIRECTORY type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_TEMP_DIRECTORY
+    changing
+      !TEMP_DIR type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_UPLOAD_DOWNLOAD_PATH
+    changing
+      value(UPLOAD_PATH) type STRING
+      value(DOWNLOAD_PATH) type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI
+      GUI_UPLOAD_DOWNLOAD_PATH
+      UPLOAD_DOWNLOAD_PATH_FAILED .
+  class-methods GET_USER_NAME
+    changing
+      !USER_NAME type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_WINDOWS_DIRECTORY
+    changing
+      !WINDOWS_DIRECTORY type STRING
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GUI_DOWNLOAD
+    importing
+      !BIN_FILESIZE type I optional
+      !FILENAME type STRING
+      !FILETYPE type CHAR10 default 'ASC'
+      !APPEND type CHAR01 default SPACE
+      !WRITE_FIELD_SEPARATOR type CHAR01 default SPACE
+      !HEADER type XSTRING default '00'
+      !TRUNC_TRAILING_BLANKS type CHAR01 default SPACE
+      !WRITE_LF type CHAR01 default 'X'
+      !COL_SELECT type CHAR01 default SPACE
+      !COL_SELECT_MASK type CHAR255 default SPACE
+      !DAT_MODE type CHAR01 default SPACE
+      !CONFIRM_OVERWRITE type CHAR01 default SPACE
+      !NO_AUTH_CHECK type CHAR01 default SPACE
+      !CODEPAGE type ABAP_ENCODING default SPACE
+      !IGNORE_CERR type ABAP_BOOL default ABAP_TRUE
+      !REPLACEMENT type ABAP_REPL default '#'
+      !WRITE_BOM type ABAP_BOOL default SPACE
+      !TRUNC_TRAILING_BLANKS_EOL type CHAR01 default 'X'
+      !WK1_N_FORMAT type C default SPACE
+      !WK1_N_SIZE type C default SPACE
+      !WK1_T_FORMAT type C default SPACE
+      !WK1_T_SIZE type C default SPACE
+      !SHOW_TRANSFER_STATUS type CHAR01 default 'X'
+      !FIELDNAMES type STANDARD TABLE optional
+      !WRITE_LF_AFTER_LAST_LINE type ABAP_BOOL default 'X'
+      !VIRUS_SCAN_PROFILE type VSCAN_PROFILE default '/SCET/GUI_DOWNLOAD'
+    exporting
+      value(FILELENGTH) type I
+    changing
+      !DATA_TAB type STANDARD TABLE
+    exceptions
+      FILE_WRITE_ERROR
+      NO_BATCH
+      GUI_REFUSE_FILETRANSFER
+      INVALID_TYPE
+      NO_AUTHORITY
+      UNKNOWN_ERROR
+      HEADER_NOT_ALLOWED
+      SEPARATOR_NOT_ALLOWED
+      FILESIZE_NOT_ALLOWED
+      HEADER_TOO_LONG
+      DP_ERROR_CREATE
+      DP_ERROR_SEND
+      DP_ERROR_WRITE
+      UNKNOWN_DP_ERROR
+      ACCESS_DENIED
+      DP_OUT_OF_MEMORY
+      DISK_FULL
+      DP_TIMEOUT
+      FILE_NOT_FOUND
+      DATAPROVIDER_EXCEPTION
+      CONTROL_FLUSH_ERROR
+      NOT_SUPPORTED_BY_GUI
+      ERROR_NO_GUI .
+  class-methods GUI_UPLOAD
+    importing
+      !FILENAME type STRING default SPACE
+      !FILETYPE type CHAR10 default 'ASC'
+      !HAS_FIELD_SEPARATOR type CHAR01 default SPACE
+      !HEADER_LENGTH type I default 0
+      !READ_BY_LINE type CHAR01 default 'X'
+      !DAT_MODE type CHAR01 default SPACE
+      !CODEPAGE type ABAP_ENCODING default SPACE
+      !IGNORE_CERR type ABAP_BOOL default ABAP_TRUE
+      !REPLACEMENT type ABAP_REPL default '#'
+      !VIRUS_SCAN_PROFILE type VSCAN_PROFILE optional
+    exporting
+      value(FILELENGTH) type I
+      value(HEADER) type XSTRING
+    changing
+      !DATA_TAB type STANDARD TABLE
+      !ISSCANPERFORMED type CHAR01 default SPACE
+    exceptions
+      FILE_OPEN_ERROR
+      FILE_READ_ERROR
+      NO_BATCH
+      GUI_REFUSE_FILETRANSFER
+      INVALID_TYPE
+      NO_AUTHORITY
+      UNKNOWN_ERROR
+      BAD_DATA_FORMAT
+      HEADER_NOT_ALLOWED
+      SEPARATOR_NOT_ALLOWED
+      HEADER_TOO_LONG
+      UNKNOWN_DP_ERROR
+      ACCESS_DENIED
+      DP_OUT_OF_MEMORY
+      DISK_FULL
+      DP_TIMEOUT
+      NOT_SUPPORTED_BY_GUI
+      ERROR_NO_GUI .
+  class-methods IS_TERMINAL_SERVER
+    returning
+      value(RESULT) type ABAP_BOOL
+    exceptions
+      CNTL_ERROR
+      NOT_SUPPORTED_BY_GUI
+      ERROR_NO_GUI .
+  class-methods REGISTRY_DELETE_KEY
+    importing
+      value(ROOT) type I
+      value(KEY) type STRING
+    exporting
+      !RC type I
+    exceptions
+      CNTL_ERROR
+      REGISTRY_DELETE_KEY_FAILED
+      BAD_PARAMETER
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods REGISTRY_DELETE_VALUE
+    importing
+      value(ROOT) type I
+      value(KEY) type STRING
+      value(VALUE) type STRING
+    exporting
+      !RC type I
+    exceptions
+      CNTL_ERROR
+      REGISTRY_DELETE_VALUE_FAILED
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods REGISTRY_GET_DWORD_VALUE
+    importing
+      value(ROOT) type I
+      value(KEY) type STRING
+      value(VALUE) type STRING optional
+    exporting
+      !REG_VALUE type I
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods REGISTRY_GET_VALUE
+    importing
+      value(ROOT) type I
+      value(KEY) type STRING
+      value(VALUE) type STRING optional
+      !NO_FLUSH type C optional
+    exporting
+      !REG_VALUE type STRING
+    exceptions
+      GET_REGVALUE_FAILED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods REGISTRY_SET_DWORD_VALUE
+    importing
+      !ROOT type I
+      !KEY type STRING
+      !VALUE type STRING optional
+      !DWORD_VALUE type I
+    exporting
+      !RC type I
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods REGISTRY_SET_VALUE
+    importing
+      value(ROOT) type I
+      value(KEY) type STRING
+      value(VALUE_NAME) type STRING optional
+      value(VALUE) type STRING
+    exporting
+      !RC type I
+    exceptions
+      REGISTRY_ERROR
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods GET_SCREENSHOT
+    exporting
+      value(MIME_TYPE_STR) type STRING
+      value(IMAGE) type XSTRING
+    exceptions
+      ACCESS_DENIED
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods RAISE_SCRIPTING_EVENT
+    importing
+      value(PARAMS) type STRING
+    exceptions
+      REGISTRY_ERROR
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  class-methods IS_SCRIPTING_ACTIVE
+    returning
+      value(RESULT) type I
+    exceptions
+      CNTL_ERROR
+      NOT_SUPPORTED_BY_GUI
+      ERROR_NO_GUI .
+  class-methods SHOW_DOCUMENT
+    importing
+      !DOCUMENT_NAME type STRING
+      !MIME_TYPE type STRING
+      !DATA_LENGTH type I
+      !KEEP_FILE type XFLAG optional
+    exporting
+      !TEMP_FILE_PATH type STRING
+    changing
+      !DOCUMENT_DATA type STANDARD TABLE
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      BAD_PARAMETER
+      ERROR_WRITING_DATA
+      ERROR_STARTING_VIEWER
+      UNKNOWN_MIME_TYPE
+      NOT_SUPPORTED_BY_GUI
+      ACCESS_DENIED
+      NO_AUTHORITY .
+  class-methods TYPEAHEAD_EXPORT
+    importing
+      !DATA type STANDARD TABLE
+    exceptions
+      CNTL_ERROR
+      ERROR_NO_GUI
+      NOT_SUPPORTED_BY_GUI .
+  type-pools CNDP .
+  type-pools CNTL .

@@ -1,0 +1,85 @@
+***INCLUDE ZZBDCRECX1.
+*----------------------------------------------------------------------*
+*   Developer: SaurabhK (Adroit Infotech)
+*   Date: Tuesday, August 08, 2017 11:18:59
+*   Description: for programs doing a data transfer by CALL TRANSACTION USING
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+*   selection screen
+*----------------------------------------------------------------------*
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE text-b01.
+PARAMETERS: p_file  TYPE ibipparms-path.
+SELECTION-SCREEN END OF BLOCK b1.
+
+SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE text-b02.
+SELECTION-SCREEN BEGIN OF LINE.
+PARAMETERS foreg RADIOBUTTON GROUP mod DEFAULT 'X'.  " Foreground Mode
+SELECTION-SCREEN COMMENT (15)  text-s01 FOR FIELD foreg.
+
+PARAMETERS backg RADIOBUTTON GROUP mod.  " Background Mode
+SELECTION-SCREEN COMMENT (15) text-s02 FOR FIELD backg.
+
+PARAMETERS error RADIOBUTTON GROUP mod.  " Background Mode
+SELECTION-SCREEN COMMENT (15) text-s03 FOR FIELD error.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF BLOCK b2.
+
+*----------------------------------------------------------------------*
+*   data definition
+*----------------------------------------------------------------------*
+*       Batchinputdata of single transaction
+DATA:   bdcdata LIKE bdcdata    OCCURS 0 WITH HEADER LINE.
+*       messages of call transaction
+DATA:   messtab LIKE bdcmsgcoll OCCURS 0 WITH HEADER LINE.
+*       Mode for call transaction
+DATA:   ctumode LIKE ctu_params-dismode.
+"A: show all dynpros
+"E: show dynpro on error only
+"N: do not display dynpro
+*       Update Mode
+DATA:   cupdate LIKE ctu_params-updmode VALUE 'L'.
+"S: synchronously
+"A: asynchronously
+"L: local
+DATA:   nodata(1) TYPE c VALUE '/'.
+DATA:   wa     TYPE ty_file,
+        it     TYPE STANDARD TABLE OF ty_file,
+        it_raw TYPE truxs_t_text_data,
+        v_file TYPE rlgrap-filename.
+
+*----------------------------------------------------------------------*
+*        Start new transaction according to parameters                 *
+*----------------------------------------------------------------------*
+FORM bdc_transaction USING tcode.
+* call transaction using
+  REFRESH messtab.
+  CALL TRANSACTION tcode USING bdcdata
+                   MODE   ctumode
+                   UPDATE cupdate
+                   MESSAGES INTO messtab.
+  REFRESH bdcdata.
+ENDFORM.
+
+*----------------------------------------------------------------------*
+*        Start new screen                                              *
+*----------------------------------------------------------------------*
+FORM bdc_dynpro USING program dynpro.
+  CLEAR bdcdata.
+  bdcdata-program  = program.
+  bdcdata-dynpro   = dynpro.
+  bdcdata-dynbegin = 'X'.
+  APPEND bdcdata.
+ENDFORM.
+
+*----------------------------------------------------------------------*
+*        Insert field                                                  *
+*----------------------------------------------------------------------*
+FORM bdc_field USING fnam fval.
+  IF fval <> nodata.
+    CLEAR bdcdata.
+    bdcdata-fnam = fnam.
+    bdcdata-fval = fval.
+    APPEND bdcdata.
+  ENDIF.
+ENDFORM.

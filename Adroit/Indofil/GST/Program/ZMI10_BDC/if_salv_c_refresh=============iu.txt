@@ -1,0 +1,9 @@
+*"* components of interface IF_SALV_C_REFRESH
+interface IF_SALV_C_REFRESH
+  public .
+
+
+  constants NONE type SALV_DE_CONSTANT value 0. "#EC NOTEXT
+  constants FULL type SALV_DE_CONSTANT value 2. "#EC NOTEXT
+  constants SOFT type SALV_DE_CONSTANT value 1. "#EC NOTEXT
+endinterface.

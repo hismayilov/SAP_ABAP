@@ -1,0 +1,44 @@
+*"* components of interface IF_SALV_BS_C_TT
+interface IF_SALV_BS_C_TT
+  public .
+
+
+  constants C_TT type SALV_BS_CONSTANT value '99'. "#EC NOTEXT
+  constants C_TT_ALVXML type SALV_BS_CONSTANT value '01'. "#EC NOTEXT
+  constants C_TT_BEX_ANALYZER type SALV_BS_CONSTANT value '40'. "#EC NOTEXT
+  constants C_TT_DATA_TABLE type SALV_BS_CONSTANT value '10'. "#EC NOTEXT
+  constants C_TT_DATA_TABLE_EX type SALV_BS_CONSTANT value '11'. "#EC NOTEXT
+  constants C_TT_DATA_TABLE_WD type SALV_BS_CONSTANT value '12'. "#EC NOTEXT
+  constants C_TT_EXCEL type SALV_BS_CONSTANT value '02'. "#EC NOTEXT
+  constants C_TT_MHTML type SALV_BS_CONSTANT value '04'. "#EC NOTEXT
+  constants C_TT_MODEL_TABLE type SALV_BS_CONSTANT value '20'. "#EC NOTEXT
+  constants C_TT_MODEL_TABLE_EX type SALV_BS_CONSTANT value '21'. "#EC NOTEXT
+  constants C_TT_MODEL_TABLE_WD type SALV_BS_CONSTANT value '22'. "#EC NOTEXT
+  constants C_TT_ODS type SALV_BS_CONSTANT value '05'. "#EC NOTEXT
+  constants C_TT_ODT type SALV_BS_CONSTANT value '06'. "#EC NOTEXT
+  constants C_TT_OFFICE2003 type SALV_BS_CONSTANT value '03'. "#EC NOTEXT
+  constants C_TT_RESULT type SALV_BS_CONSTANT value '30'. "#EC NOTEXT
+  constants C_TT_RESULT_TABLE type SALV_BS_CONSTANT value '31'. "#EC NOTEXT
+  constants C_TT_RESULT_TABLE_EX type SALV_BS_CONSTANT value '32'. "#EC NOTEXT
+  constants C_TT_RESULT_TABLE_WD type SALV_BS_CONSTANT value '33'. "#EC NOTEXT
+  constants C_TT_SO type SALV_BS_CONSTANT value '07'. "#EC NOTEXT
+  constants C_TYPE type SALV_BS_CONSTANT value '99'. "#EC NOTEXT
+  constants C_TYPE_FILE type SALV_BS_CONSTANT value '01'. "#EC NOTEXT
+  constants C_TYPE_OBJECT type SALV_BS_CONSTANT value '02'. "#EC NOTEXT
+  constants C_TYPE_URL type SALV_BS_CONSTANT value '03'. "#EC NOTEXT
+  constants C_TT_TAG_ALL_COLUMNS type SALV_BS_TAG_TYPE_IDENTIFIER value 'C0'. "#EC NOTEXT
+  constants C_TT_TAG_VISIBLE_COLUMNS type SALV_BS_TAG_TYPE_IDENTIFIER value 'C1'. "#EC NOTEXT
+  constants C_TT_TAG_ALL_FIELDS type SALV_BS_TAG_TYPE_IDENTIFIER value 'F0'. "#EC NOTEXT
+  constants C_TT_TAG_SORT_SERVICE type SALV_BS_TAG_TYPE_IDENTIFIER value 'S0'. "#EC NOTEXT
+  constants C_TT_TAG_AGGR_SERVICE type SALV_BS_TAG_TYPE_IDENTIFIER value 'S1'. "#EC NOTEXT
+  constants C_TT_TAG_FILTER_SERVICE type SALV_BS_TAG_TYPE_IDENTIFIER value 'S2'. "#EC NOTEXT
+  constants C_TT_TAG_DATA type SALV_BS_TAG_TYPE_IDENTIFIER value 'D0'. "#EC NOTEXT
+  constants C_TT_TAG_FULL_ROW type SALV_BS_TAG_TYPE_IDENTIFIER value 'R0'. "#EC NOTEXT
+  constants C_TT_TAG_SIMPLE_ROW type SALV_BS_TAG_TYPE_IDENTIFIER value 'R1'. "#EC NOTEXT
+  constants C_TT_XML_FLAVOUR_FULL type STRING value 'C0S0S1S2F0R0D0I0'. "#EC NOTEXT
+  constants C_TT_XML_FLAVOUR_DATA type STRING value 'C0S0S1S2F0D0I0'. "#EC NOTEXT
+  constants C_TT_XML_FLAVOUR_ROWS type STRING value 'C0S0S1S2F0R0I0'. "#EC NOTEXT
+  constants C_TT_XML_FLAVOUR_EXPORT type STRING value 'C1F0S0S1S2R1I0'. "#EC NOTEXT
+  constants C_TT_TAG_IMAGES type SALV_BS_TAG_TYPE_IDENTIFIER value 'I0'. "#EC NOTEXT
+  constants C_TT_XML_FLAVOUR_EXPORT_NO_IMG type STRING value 'C1F0S0S1S2R1'. "#EC NOTEXT
+endinterface.

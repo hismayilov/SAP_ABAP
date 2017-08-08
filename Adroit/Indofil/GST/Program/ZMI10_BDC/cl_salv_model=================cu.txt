@@ -1,0 +1,17 @@
+class CL_SALV_MODEL definition
+  public
+  abstract
+  create public .
+
+*"* public components of class CL_SALV_MODEL
+*"* do not include other source files here!!!
+public section.
+
+  data MODEL type SALV_DE_CONSTANT .
+
+  class-methods IS_OFFLINE
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods GET_DISPLAY_OBJECT
+    returning
+      value(VALUE) type SALV_DE_CONSTANT .

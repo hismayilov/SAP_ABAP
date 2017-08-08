@@ -1,0 +1,62 @@
+class CL_SALV_MODEL_BASE definition
+  public
+  inheriting from CL_SALV_MODEL
+  abstract
+  create public
+
+  global friends CL_SALV_CONTROLLER .
+
+*"* public components of class CL_SALV_MODEL_BASE
+*"* do not include other source files here!!!
+public section.
+
+  constants C_FUNCTIONS_NONE type SALV_DE_CONSTANT value 0. "#EC NOTEXT
+  constants C_FUNCTIONS_DEFAULT type SALV_DE_CONSTANT value 1. "#EC NOTEXT
+  constants C_FUNCTIONS_ALL type SALV_DE_CONSTANT value 2. "#EC NOTEXT
+
+  methods SET_SCREEN_STATUS
+    importing
+      !REPORT type SYREPID
+      !PFSTATUS type SYPFKEY
+      !SET_FUNCTIONS type SALV_DE_CONSTANT default C_FUNCTIONS_NONE .
+  methods SET_SCREEN_POPUP
+    importing
+      !START_COLUMN type I
+      !END_COLUMN type I optional
+      !START_LINE type I
+      !END_LINE type I optional .
+  methods GET_TOP_OF_LIST
+    returning
+      value(VALUE) type ref to CL_SALV_FORM_ELEMENT .
+  methods GET_TOP_OF_LIST_PRINT
+    returning
+      value(VALUE) type ref to CL_SALV_FORM_ELEMENT .
+  methods GET_SCREEN_STATUS
+    exporting
+      !REPORT type SYREPID
+      !PFSTATUS type SYPFKEY .
+  methods GET_SCREEN_POPUP
+    exporting
+      !START_COLUMN type I
+      !END_COLUMN type I
+      !START_LINE type I
+      !END_LINE type I .
+  methods GET_END_OF_LIST_PRINT
+    returning
+      value(VALUE) type ref to CL_SALV_FORM_ELEMENT .
+  methods GET_END_OF_LIST
+    returning
+      value(VALUE) type ref to CL_SALV_FORM_ELEMENT .
+  methods SET_TOP_OF_LIST
+    importing
+      !VALUE type ref to CL_SALV_FORM_ELEMENT .
+  methods SET_END_OF_LIST
+    importing
+      !VALUE type ref to CL_SALV_FORM_ELEMENT .
+  methods GET_FUNCTIONS_BASE
+    returning
+      value(VALUE) type ref to CL_SALV_FUNCTIONS .
+  methods SET_FUNCTION
+    importing
+      !VALUE type SALV_DE_FUNCTION .
+  methods CLOSE_SCREEN .

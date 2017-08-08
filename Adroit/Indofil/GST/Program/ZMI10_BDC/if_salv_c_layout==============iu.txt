@@ -1,0 +1,9 @@
+*"* components of interface IF_SALV_C_LAYOUT
+interface IF_SALV_C_LAYOUT
+  public .
+
+
+  constants RESTRICT_NONE type SALV_DE_LAYOUT_RESTRICTION value 3. "#EC NOTEXT
+  constants RESTRICT_USER_DEPENDANT type SALV_DE_LAYOUT_RESTRICTION value 2. "#EC NOTEXT
+  constants RESTRICT_USER_INDEPENDANT type SALV_DE_LAYOUT_RESTRICTION value 1. "#EC NOTEXT
+endinterface.

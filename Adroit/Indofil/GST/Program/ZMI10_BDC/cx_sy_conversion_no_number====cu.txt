@@ -1,0 +1,19 @@
+class CX_SY_CONVERSION_NO_NUMBER definition
+  public
+  inheriting from CX_SY_CONVERSION_ERROR
+  final
+  create public .
+
+*"* public components of class CX_SY_CONVERSION_NO_NUMBER
+*"* do not include other source files here!!!
+public section.
+
+  constants CX_SY_CONVERSION_NO_NUMBER type SOTR_CONC
+ value '995DB739AB5CE919E10000000A11447B' .
+  data VALUE type STRING read-only .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional
+      value(VALUE) type STRING optional .

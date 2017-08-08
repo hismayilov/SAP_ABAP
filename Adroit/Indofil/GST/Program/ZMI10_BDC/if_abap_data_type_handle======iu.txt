@@ -1,0 +1,4 @@
+interface IF_ABAP_DATA_TYPE_HANDLE
+  public .
+
+endinterface.

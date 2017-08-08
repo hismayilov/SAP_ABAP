@@ -1,0 +1,5 @@
+*"* components of interface IF_SERIALIZABLE_OBJECT
+interface IF_SERIALIZABLE_OBJECT
+  public .
+
+endinterface.

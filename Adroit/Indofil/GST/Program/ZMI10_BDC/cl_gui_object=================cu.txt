@@ -1,0 +1,35 @@
+class CL_GUI_OBJECT definition
+  public
+  create public .
+
+*"* public components of class CL_GUI_OBJECT
+*"* do not include other source files here!!!
+public section.
+
+  interfaces IF_CACHED_PROP .
+
+  class-data ACTIVEX type CHAR01 read-only .
+  class-data CATT_ACTIV type CHAR01 read-only .
+  class-data GUI_IS_RUNNING type CHAR01 read-only .
+  type-pools OLE2 .
+  class-data H_GUI type OLE2_OBJECT read-only .
+  class-data IS_INIT type CHAR1 read-only .
+  class-data JAVABEAN type CHAR01 read-only .
+  class-data WWW_ACTIVE type CHAR01 read-only .
+
+  class-methods CLASS_CONSTRUCTOR .
+  methods IS_VALID
+    exporting
+      value(RESULT) type I .
+  methods CONSTRUCTOR
+    importing
+      value(CLSID) type C optional
+      value(LIFETIME) type I optional
+    exceptions
+      CREATE_ERROR
+      LIFETIME_ERROR .
+  methods FREE
+    exceptions
+      CNTL_ERROR
+      CNTL_SYSTEM_ERROR .
+  type-pools CNTL .

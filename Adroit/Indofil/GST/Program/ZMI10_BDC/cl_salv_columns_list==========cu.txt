@@ -1,0 +1,96 @@
+class CL_SALV_COLUMNS_LIST definition
+  public
+  inheriting from CL_SALV_COLUMNS
+  create public
+
+  global friends CL_SALV_ADAPTER
+                 CL_SALV_CONTROLLER
+                 CL_SALV_DATA_DESCR
+                 CL_SALV_SERVICE_LAYOUT_DB .
+
+*"* public components of class CL_SALV_COLUMNS_LIST
+*"* do not include other source files here!!!
+public section.
+
+  methods CONSTRUCTOR
+    importing
+      !R_DATA type ref to DATA
+      !R_CONTROLLER type ref to IF_SALV_CONTROLLER_METADATA optional .
+  methods GET_CELL_TYPE_COLUMN
+    returning
+      value(VALUE) type LVC_FNAME .
+  methods GET_COLOR_COLUMN
+    returning
+      value(VALUE) type LVC_FNAME .
+  methods GET_COUNT_COLUMN
+    returning
+      value(VALUE) type LVC_FNAME .
+  methods GET_DROPDOWN_ENTRY_COLUMN
+    returning
+      value(VALUE) type LVC_FNAME .
+  methods GET_ENABLED_COLUMN
+    returning
+      value(VALUE) type LVC_FNAME .
+  methods GET_EXCEPTION_COLUMN
+    returning
+      value(VALUE) type LVC_FNAME .
+  methods GET_EXCEPTION_SETTINGS
+    exporting
+      !GROUP type CHAR1
+      !CONDENSED type SAP_BOOL .
+  methods GET_HYPERLINK_ENTRY_COLUMN
+    returning
+      value(VALUE) type LVC_FNAME .
+  methods HAS_KEY_FIXATION
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_EXCEPTION_CONDENSED
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_HEADERS_VISIBLE
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods SET_CELL_TYPE_COLUMN
+    importing
+      !VALUE type LVC_FNAME
+    raising
+      CX_SALV_DATA_ERROR .
+  methods SET_COLOR_COLUMN
+    importing
+      !VALUE type LVC_FNAME
+    raising
+      CX_SALV_DATA_ERROR .
+  methods SET_COUNT_COLUMN
+    importing
+      !VALUE type LVC_FNAME
+    raising
+      CX_SALV_DATA_ERROR .
+  methods SET_DROPDOWN_ENTRY_COLUMN
+    importing
+      !VALUE type LVC_FNAME
+    raising
+      CX_SALV_DATA_ERROR .
+  methods SET_ENABLED_COLUMN
+    importing
+      !VALUE type LVC_FNAME
+    raising
+      CX_SALV_DATA_ERROR .
+  interface IF_SALV_C_BOOL_SAP load .
+  methods SET_EXCEPTION_COLUMN
+    importing
+      !VALUE type LVC_FNAME
+      !GROUP type CHAR1 default SPACE
+      !CONDENSED type SAP_BOOL default IF_SALV_C_BOOL_SAP=>FALSE
+    raising
+      CX_SALV_DATA_ERROR .
+  methods SET_HEADERS_VISIBLE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP~TRUE .
+  methods SET_HYPERLINK_ENTRY_COLUMN
+    importing
+      !VALUE type LVC_FNAME
+    raising
+      CX_SALV_DATA_ERROR .
+  methods SET_KEY_FIXATION
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP~TRUE .

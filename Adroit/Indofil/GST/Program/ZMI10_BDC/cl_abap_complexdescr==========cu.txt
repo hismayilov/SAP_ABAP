@@ -1,0 +1,9 @@
+class CL_ABAP_COMPLEXDESCR definition
+  public
+  inheriting from CL_ABAP_DATADESCR
+  abstract
+  create public .
+
+*"* public components of class CL_ABAP_COMPLEXDESCR
+*"* do not include other source files here!!!
+public section.

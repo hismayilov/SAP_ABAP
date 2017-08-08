@@ -1,0 +1,20 @@
+class CX_SY_UNKNOWN_TYPE definition
+  public
+  inheriting from CX_DYNAMIC_CHECK
+  create public .
+
+*"* public components of class CX_SY_UNKNOWN_TYPE
+*"* do not include other source files here!!!
+public section.
+
+  constants CX_SY_UNKNOWN_TYPE type SOTR_CONC
+ value '3ABD443F3DAFCE14E10000000A114BF5'. "#EC NOTEXT
+  constants EMPTY_NAME type SOTR_CONC
+ value 'FC2C673FDB262D05E10000000A114BF5'. "#EC NOTEXT
+  data TYPE_NAME type STRING .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional
+      value(TYPE_NAME) type STRING optional .

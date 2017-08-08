@@ -1,0 +1,62 @@
+class CL_SALV_LAYOUT definition
+  public
+  inheriting from CL_SALV_METADATA_BASE
+  final
+  create public
+
+  global friends CL_SALV_ADAPTER
+                 CL_SALV_CONTROLLER .
+
+*"* public components of class CL_SALV_LAYOUT
+*"* do not include other source files here!!!
+public section.
+
+  interfaces IF_SALV_C_LAYOUT .
+
+  aliases RESTRICT_NONE
+    for IF_SALV_C_LAYOUT~RESTRICT_NONE .
+  aliases RESTRICT_USER_DEPENDANT
+    for IF_SALV_C_LAYOUT~RESTRICT_USER_DEPENDANT .
+  aliases RESTRICT_USER_INDEPENDANT
+    for IF_SALV_C_LAYOUT~RESTRICT_USER_INDEPENDANT .
+
+  methods CONSTRUCTOR
+    importing
+      !R_CONTROLLER type ref to IF_SALV_CONTROLLER_METADATA optional .
+  methods F4_LAYOUTS
+    returning
+      value(VALUE) type SALV_S_LAYOUT .
+  methods GET_CURRENT_LAYOUT
+    returning
+      value(VALUE) type SALV_S_LAYOUT .
+  methods GET_DEFAULT_LAYOUT
+    returning
+      value(VALUE) type SALV_S_LAYOUT .
+  methods GET_INITIAL_LAYOUT
+    returning
+      value(VALUE) type SLIS_VARI .
+  methods GET_KEY
+    returning
+      value(VALUE) type SALV_S_LAYOUT_KEY .
+  methods GET_LAYOUTS
+    returning
+      value(VALUE) type SALV_T_LAYOUT_INFO .
+  methods GET_SAVE_RESTRICTION
+    returning
+      value(VALUE) type SALV_DE_LAYOUT_RESTRICTION .
+  methods HAS_DEFAULT
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods SET_DEFAULT
+    importing
+      !VALUE type SAP_BOOL .
+  methods SET_INITIAL_LAYOUT
+    importing
+      !VALUE type SLIS_VARI .
+  methods SET_KEY
+    importing
+      !VALUE type SALV_S_LAYOUT_KEY .
+  interface IF_SALV_C_LAYOUT load .
+  methods SET_SAVE_RESTRICTION
+    importing
+      !VALUE type SALV_DE_LAYOUT_RESTRICTION default IF_SALV_C_LAYOUT=>RESTRICT_NONE .
