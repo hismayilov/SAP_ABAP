@@ -1,0 +1,43 @@
+TYPE-POOL OLE2 .
+
+
+TYPES:
+  OLE2_OBJECT LIKE   OBJ_RECORD.
+*    Object handle initialization
+CONSTANTS:
+  OLE2_OBJECT_HEADER TYPE OLE2_OBJECT-HEADER VALUE 'OBJH',
+  OLE2_OBJECT_TYPE   TYPE OLE2_OBJECT-TYPE   VALUE 'OLE2',
+  OLE2_OBJECT_HANDLE TYPE OLE2_OBJECT-HANDLE VALUE -1,
+  BEGIN OF OLE2_OBJECT_INITIAL,
+    HEADER   TYPE OLE2_OBJECT-HEADER    VALUE OLE2_OBJECT_HEADER,
+    TYPE     TYPE OLE2_OBJECT-TYPE      VALUE OLE2_OBJECT_TYPE,
+    HANDLE   TYPE OLE2_OBJECT-HANDLE    VALUE OLE2_OBJECT_HANDLE,
+    CB_INDEX TYPE OLE2_OBJECT-CB_INDEX  VALUE SPACE,
+    CLSID    TYPE OLE2_OBJECT-CLSID     VALUE SPACE,
+  END OF OLE2_OBJECT_INITIAL.
+
+CONSTANTS: OLE2_%_POINTER POINTER.
+TYPES: BEGIN OF OLE2_PCB,
+       PCBID TYPE I,
+       DATACB LIKE OLE2_%_POINTER,
+       END OF OLE2_PCB.
+
+TYPES BEGIN OF OLE2_METH_PARMS.
+  INCLUDE STRUCTURE SWCONT.
+  TYPES POINTER TYPE OLE2_PCB.
+TYPES END OF   OLE2_METH_PARMS.
+
+TYPES:
+  OLE2_METH_PARMS_TAB TYPE OLE2_METH_PARMS OCCURS 0,
+*    Method Parameter Table: contains the methoid parameter
+*      types and values exporting and importing parameters.
+  OLE2_LCID TYPE I,
+*    Locale Id: determines the language and other settings
+*      (like value formats) of the automation server.
+*      For more information see: Include OLE2LCID
+  OLE2_TYPE TYPE I.
+*    OLE Variant Type: determines the "variant type" for the
+*      parameters of Automation Controller requests.
+*      For more information see: Include OLE2TYPE
+
+TYPES: OLE2_PARAMETER LIKE SWCBCONT-VALUE.

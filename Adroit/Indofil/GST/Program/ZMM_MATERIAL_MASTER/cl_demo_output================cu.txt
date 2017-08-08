@@ -1,0 +1,81 @@
+class CL_DEMO_OUTPUT definition
+  public
+  final
+  create private .
+
+public section.
+
+  interfaces IF_DEMO_OUTPUT_FORMATS .
+  interfaces IF_DEMO_OUTPUT .
+
+  constants HTML_MODE type STRING value 'HTML'. "#EC NOTEXT
+  constants TEXT_MODE type STRING value 'TEXT'. "#EC NOTEXT
+
+  methods CONSTRUCTOR
+    importing
+      !MODE type STRING default HTML_MODE .
+  class-methods CLASS_CONSTRUCTOR .
+  class-methods WRITE
+    importing
+      !DATA type ANY
+      !NAME type STRING optional .
+  class-methods WRITE_DATA
+    importing
+      !VALUE type DATA
+      !NAME type STRING optional .
+  class-methods DISPLAY_DATA
+    importing
+      !VALUE type DATA
+      !NAME type STRING optional .
+  class-methods WRITE_TEXT
+    importing
+      !TEXT type CLIKE .
+  class-methods DISPLAY_TEXT
+    importing
+      !TEXT type CLIKE .
+  class-methods DISPLAY
+    importing
+      !DATA type ANY optional
+      !NAME type STRING optional
+    preferred parameter DATA .
+  class-methods WRITE_XML
+    importing
+      !XML type SIMPLE .
+  class-methods WRITE_JSON
+    importing
+      !JSON type SIMPLE .
+  class-methods DISPLAY_XML
+    importing
+      !XML type SIMPLE .
+  class-methods DISPLAY_JSON
+    importing
+      !JSON type SIMPLE .
+  class-methods WRITE_HTML
+    importing
+      !HTML type CSEQUENCE .
+  class-methods DISPLAY_HTML
+    importing
+      !HTML type CSEQUENCE .
+  class-methods BEGIN_SECTION
+    importing
+      !TITLE type CLIKE optional .
+  class-methods END_SECTION .
+  class-methods LINE .
+  class-methods NEXT_SECTION
+    importing
+      !TITLE type CLIKE .
+  class-methods SET_MODE
+    importing
+      !MODE type STRING default HTML_MODE .
+  class-methods NEW
+    importing
+      !MODE type STRING default HTML_MODE
+    returning
+      value(OUTPUT) type ref to IF_DEMO_OUTPUT .
+  class-methods GET
+    importing
+      !DATA type ANY optional
+      !NAME type STRING optional
+    preferred parameter DATA
+    returning
+      value(OUTPUT) type STRING .
