@@ -1,0 +1,54 @@
+class CL_SALV_COLUMNS definition
+  public
+  inheriting from CL_SALV_METADATA_BASE
+  create public
+
+  global friends CL_SALV_ADAPTER
+                 CL_SALV_CONTROLLER
+                 CL_SALV_DATA_DESCR
+                 CL_SALV_SERVICE_LAYOUT_DB .
+
+*"* public components of class CL_SALV_COLUMNS
+*"* do not include other source files here!!!
+public section.
+
+  class CL_SALV_DDIC_APPLY definition load .
+  constants C_APPLY_DDIC_BY_COLUMNNAME type SALV_DE_CONSTANT value CL_SALV_DDIC_APPLY=>C_APPLY_DDIC_BY_COLUMNNAME. "#EC NOTEXT
+  constants C_APPLY_DDIC_BY_ROLLNAME type SALV_DE_CONSTANT value CL_SALV_DDIC_APPLY=>C_APPLY_DDIC_BY_ROLLNAME. "#EC NOTEXT
+  constants C_APPLY_DDIC_BY_DOMAIN type SALV_DE_CONSTANT value CL_SALV_DDIC_APPLY=>C_APPLY_DDIC_BY_DOMAIN. "#EC NOTEXT
+
+  methods APPLY_DDIC_STRUCTURE
+    importing
+      !NAME type ANY
+      !APPLY_METHOD type I default C_APPLY_DDIC_BY_COLUMNNAME .
+  methods CONSTRUCTOR
+    importing
+      !R_DATA type ref to DATA
+      !R_CONTROLLER type ref to IF_SALV_CONTROLLER_METADATA optional .
+  methods GET
+    returning
+      value(VALUE) type SALV_T_COLUMN_REF .
+  methods GET_COLUMN
+    importing
+      !COLUMNNAME type LVC_FNAME
+    returning
+      value(VALUE) type ref to CL_SALV_COLUMN
+    raising
+      CX_SALV_NOT_FOUND .
+  methods GET_COLUMN_POSITION
+    importing
+      !COLUMNNAME type LVC_FNAME
+    returning
+      value(VALUE) type I
+    raising
+      CX_SALV_NOT_FOUND .
+  methods IS_OPTIMIZED
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods SET_COLUMN_POSITION
+    importing
+      !COLUMNNAME type LVC_FNAME
+      !POSITION type I optional .
+  methods SET_OPTIMIZE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP~TRUE .

@@ -1,0 +1,350 @@
+type-pool abap .
+
+************************************************************************
+* WARNING!!!!! DO NOT CHANGE ANY OF THE FOLLOWING TYPES! WARNING !!!!! *
+* !!!!!!!! All types have to synchronized with ABAP kernel types !!!!! *
+************************************************************************
+
+************************************************************************
+* NAMES WITH PREFIX "ABAP_" DECLARED IN THE DDIC
+* MUST NOT BE REDEFINED HERE!
+************************************************************************
+* abap_encod
+* abap_endia
+* abap_repl
+
+************************************************************************
+**** GENERAL ***********************************************************
+types:
+  abap_bool type c length 1.
+* constants for abap_bool
+constants:
+  abap_true      type abap_bool value 'X',
+  abap_false     type abap_bool value ' ',
+  abap_undefined type abap_bool value '-',
+  abap_on        type abap_bool value 'X',
+  abap_off       type abap_bool value ' '.
+
+
+************************************************************************
+**** DESCRIBE   ********************************************************
+constants:
+  abap_max_abs_type_name_ln   type i value        200,
+  abap_max_class_name_ln      type i value         30,
+  abap_max_intf_name_ln       type i value         30,
+  abap_max_comp_name_ln       type i value         30,
+  abap_max_key_name_ln        type i value        255,
+  abap_max_class_comp_name_ln type i value         61,
+  abap_max_edit_mask_ln       type i value          7,
+  abap_max_help_id_ln         type i value         62,
+  abap_max_db_string_ln       type i value  536870912,
+  abap_max_db_rawstring_ln    type i value 1073741824.
+
+
+
+types:
+* type kinds
+  abap_typekind       type c length 1, " check CL_ABAP_TYPEDESCR for values
+  abap_typecategory   type c length 1, " check CL_ABAP_TYPEDESCR for values
+  abap_typepropkind   type c length 1,
+  abap_structkind     type c length 1,
+  abap_tablekind      type c length 1,
+  abap_keydefkind     type c length 1,
+  abap_classkind      type c length 1,
+  abap_intfkind       type c length 1,
+  abap_parmkind       type c length 1,
+* misc
+  abap_editmask   type c length abap_max_edit_mask_ln,
+  abap_helpid     type c length abap_max_help_id_ln,
+  abap_visibility type c length 1,
+* name types
+  abap_typename    type c length abap_max_class_comp_name_ln,
+  abap_abstypename type c length abap_max_abs_type_name_ln,
+  abap_compname    type c length abap_max_comp_name_ln,
+  abap_keyname     type c length abap_max_key_name_ln,
+  abap_keycompname type          abap_keyname,
+  abap_classname   type c length abap_max_class_name_ln,
+  abap_intfname    type c length abap_max_intf_name_ln,
+  abap_attrname    type c length abap_max_class_comp_name_ln,
+  abap_methname    type c length abap_max_class_comp_name_ln,
+  abap_evntname    type c length abap_max_class_comp_name_ln,
+  abap_parmname    type c length abap_max_comp_name_ln,
+  abap_excpname    type c length abap_max_comp_name_ln,
+* structure component description
+  begin of abap_compdescr,
+    length    type i,
+    decimals  type i,
+    type_kind type abap_typekind,
+    name      type abap_compname,
+  end of abap_compdescr,
+  abap_compdescr_tab type standard table of abap_compdescr
+                     with key name,
+  begin of abap_componentdescr,
+    name       type string,
+    type       type ref to cl_abap_datadescr,
+    as_include type abap_bool,
+    suffix     type string,
+  end of abap_componentdescr,
+  abap_component_tab type standard table of abap_componentdescr
+                     with key name,
+  begin of abap_simple_componentdescr,
+    name       type string,
+    type       type ref to cl_abap_datadescr,
+  end of abap_simple_componentdescr,
+  abap_component_symbol_tab type hashed table of abap_simple_componentdescr
+                            with unique key name,
+  abap_component_view_tab type standard table of abap_simple_componentdescr
+                          with key name,
+* key description of tables
+  begin of abap_keydescr,
+    name type abap_keyname,
+  end of abap_keydescr,
+  abap_keydescr_tab type standard table of abap_keydescr
+                    with key name,
+* description of all secondary keys and primary key of tables
+  begin of abap_table_keycompdescr,
+    name type abap_keycompname,
+  end of abap_table_keycompdescr,
+  begin of abap_table_keydescr,
+    components      type standard table of abap_table_keycompdescr
+                         with non-unique default key
+                         initial size 4,
+    name            type abap_compname,
+    is_primary      type abap_bool,
+    access_kind     type abap_tablekind,
+    is_unique       type abap_bool,
+    key_kind        type abap_keydefkind,
+  end of abap_table_keydescr,
+  abap_table_keydescr_tab type standard table of abap_table_keydescr
+                          with non-unique key name
+                          initial size 2,
+* parameter description (methods and event)
+  begin of abap_parmdescr,
+    length        type i,
+    decimals      type i,
+    type_kind     type abap_typekind,
+    name          type abap_parmname,
+    parm_kind     type abap_parmkind,
+    by_value      type abap_bool,
+    is_optional   type abap_bool,
+  end of abap_parmdescr,
+  abap_parmdescr_tab type standard table of abap_parmdescr
+                     with key name,
+* exception description (method and event)
+  begin of abap_excpdescr,
+    name type abap_excpname,
+    is_resumable TYPE abap_bool, "abap_false for old exceptions,
+                                 "abap_true or abap_false for class based exceptions
+  end of abap_excpdescr,
+  abap_excpdescr_tab type standard table of abap_excpdescr
+                     with key name,
+* exposed and access friend description
+  begin of abap_frnddescr,
+    name type abap_classname,
+  end of abap_frnddescr,
+  abap_frnddescr_tab type standard table of abap_frnddescr
+                     with key name,
+* included interfaces / interface implementation description
+  begin of abap_intfdescr,
+    name           type abap_intfname,
+    is_inherited   type abap_bool,
+  end of abap_intfdescr,
+  abap_intfdescr_tab type standard table of abap_intfdescr
+                     with key name,
+* type definition inside class / interface
+  begin of abap_typedef,
+    name           type abap_typename,
+    alias_for      type abap_typename,
+    visibility     type abap_visibility,
+    is_interface   type abap_bool,
+    is_inherited   type abap_bool,
+  end of abap_typedef,
+  abap_typedef_tab type standard table of abap_typedef
+                     with key name,
+* attribute description
+  begin of abap_attrdescr,
+    length         type i,
+    decimals       type i,
+    name           type abap_attrname,
+    type_kind      type abap_typekind,
+    visibility     type abap_visibility,
+    is_interface   type abap_bool,
+    is_inherited   type abap_bool,
+    is_class       type abap_bool,
+    is_constant    type abap_bool,
+    is_virtual     type abap_bool,
+    is_read_only   type abap_bool,
+    alias_for      type abap_attrname,
+  end of abap_attrdescr,
+  abap_attrdescr_tab type standard table of abap_attrdescr
+                     with key name,
+* method description
+  begin of abap_methdescr,
+    parameters       type abap_parmdescr_tab,
+    exceptions       type abap_excpdescr_tab,
+    name             type abap_methname,
+    for_event        type abap_evntname,
+    of_class         type abap_classname,
+    visibility       type abap_visibility,
+    is_interface     type abap_bool,
+    is_inherited     type abap_bool,
+    is_redefined     type abap_bool,
+    is_abstract      type abap_bool,
+    is_final         type abap_bool,
+    is_class         type abap_bool,
+    alias_for        type abap_methname,
+    is_raising_excps type abap_bool, "abap_true if method declaration has a raising clause
+                                     "abap_false otherwise
+  end of abap_methdescr,
+  abap_methdescr_tab type standard table of abap_methdescr
+                     with key name,
+* event description
+  begin of abap_evntdescr,
+    parameters    type abap_parmdescr_tab,
+    name          type abap_evntname,
+    visibility    type abap_visibility,
+    is_interface  type abap_bool,
+    is_inherited  type abap_bool,
+    is_class      type abap_bool,
+    alias_for     type abap_evntname,
+  end of abap_evntdescr,
+  abap_evntdescr_tab type standard table of abap_evntdescr
+                     with key name,
+
+* table for get_friend_types
+  abap_frndtypes_tab type standard table of ref to cl_abap_typedescr
+                     with key table_line.
+
+
+************************************************************************
+************* DYNAMIC CALL FUNCTION ************************************
+types:
+* CALL FUNCTION ... PARAMETER-TABLE
+  begin of abap_func_parmbind,
+    value     type ref to data,
+    tables_wa type ref to data,
+    kind      type i,
+    name      type abap_parmname,
+  end of abap_func_parmbind,
+  abap_func_parmbind_tab type sorted table of abap_func_parmbind
+                         with unique key kind name,
+* CALL FUNCTION ... EXCEPTION-TABLE
+  begin of abap_func_excpbind,
+    message type ref to data,
+    value   type i,
+    name    type abap_excpname,
+  end of abap_func_excpbind,
+  abap_func_excpbind_tab type hashed table of abap_func_excpbind
+                         with unique key name.
+
+constants:
+  abap_func_exporting type abap_func_parmbind-kind value 10,
+  abap_func_importing type abap_func_parmbind-kind value 20,
+  abap_func_tables    type abap_func_parmbind-kind value 30,
+  abap_func_changing  type abap_func_parmbind-kind value 40.
+
+************************************************************************
+************* DYNAMIC INVOKE *******************************************
+types:
+* PARAMETER-TABLE
+  begin of abap_parmbind,
+    name  type abap_parmname,
+    kind  type abap_parmkind,
+    value type ref to data,
+  end of abap_parmbind,
+  abap_parmbind_tab type hashed table of abap_parmbind
+                    with unique key name,
+* EXCEPTION-TABLE
+  begin of abap_excpbind,
+    name  type abap_excpname,
+    value type i,
+  end of abap_excpbind,
+  abap_excpbind_tab type hashed table of abap_excpbind
+                    with unique key name.
+
+
+************************************************************************
+**** Types for CL_ABAP_CHAR_UTILITIES **********************************
+types:
+  abap_char1(1)              type c,
+  abap_cr_lf(2)              type c,
+  abap_byte_order_mark(2)    type x,
+  abap_byte_order_utf8(3)    type x.
+
+
+************************************************************************
+**** CONVERSION ********************************************************
+types:
+  abap_encoding type abap_encod,
+  abap_endian type abap_endia.
+
+************************************************************************
+**** CALL TRANSFORMATION ***********************************************
+
+* PARAMETER TABLE
+types:
+  abap_trans_parmname  type string,
+  abap_trans_parmvalue type string,
+  abap_trans_parmref   type ref to data.
+
+types:
+  begin of abap_trans_parmbind,
+    name  type abap_trans_parmname,
+    value type abap_trans_parmvalue,
+  end of abap_trans_parmbind,
+  begin of abap_trans_parm_obj_bind,
+    name  type abap_trans_parmname,
+    value type abap_trans_parmref,
+  end of abap_trans_parm_obj_bind.
+
+types:
+  abap_trans_parmbind_tab
+      type standard table of abap_trans_parmbind with key name,
+  abap_trans_parm_obj_bind_tab
+      type sorted table of abap_trans_parm_obj_bind with unique key name.
+
+* OBJECT TABLE
+types:
+  abap_trans_objname type string.
+
+types:
+  begin of abap_trans_objbind,
+    name  type abap_trans_objname,
+    value type ref to object,
+  end of abap_trans_objbind.
+
+types:
+  abap_trans_objbind_tab
+      type standard table of abap_trans_objbind with key name.
+
+* SOURCE TABLE
+types:
+  abap_trans_srcname type string.
+
+types:
+  begin of abap_trans_srcbind,
+    name  type abap_trans_srcname,
+    value type ref to data,
+  end of abap_trans_srcbind.
+
+types:
+  abap_trans_srcbind_tab
+       type standard table of abap_trans_srcbind with key name,
+  abap_trans_srcbind_tab_sorted
+       type sorted table of abap_trans_srcbind with unique key name.
+
+* RESULT TABLE
+types:
+  abap_trans_resname type string.
+
+types:
+  begin of abap_trans_resbind,
+    name  type abap_trans_resname,
+    value type ref to data,
+  end of abap_trans_resbind.
+
+types:
+  abap_trans_resbind_tab
+       type standard table of abap_trans_resbind with key name,
+  abap_trans_resbind_tab_sorted
+       type sorted table of abap_trans_resbind with unique key name.

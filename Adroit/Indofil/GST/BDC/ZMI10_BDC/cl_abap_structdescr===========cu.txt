@@ -1,0 +1,71 @@
+class CL_ABAP_STRUCTDESCR definition
+  public
+  inheriting from CL_ABAP_COMPLEXDESCR
+  final
+  create protected
+
+  global friends CL_ABAP_REFDESCR .
+
+public section.
+
+*"* public components of class CL_ABAP_STRUCTDESCR
+*"* do not include other source files here!!!
+  type-pools ABAP .
+  types COMPONENT type ABAP_COMPONENTDESCR .
+  types COMPONENT_TABLE type ABAP_COMPONENT_TAB .
+  types SYMBOL_TABLE type ABAP_COMPONENT_SYMBOL_TAB .
+  types INCLUDED_VIEW type ABAP_COMPONENT_VIEW_TAB .
+
+  data STRUCT_KIND type ABAP_STRUCTKIND read-only .
+  constants STRUCTKIND_FLAT type ABAP_STRUCTKIND value 'F'. "#EC NOTEXT
+  data COMPONENTS type ABAP_COMPDESCR_TAB read-only .
+  constants STRUCTKIND_NESTED type ABAP_STRUCTKIND value 'N'. "#EC NOTEXT
+  constants STRUCTKIND_MESH type ABAP_STRUCTKIND value 'M'. "#EC NOTEXT
+  data HAS_INCLUDE type ABAP_BOOL read-only .
+
+  class-methods LOAD_CLASS .
+  class-methods CLASS_CONSTRUCTOR .
+  methods GET_DDIC_FIELD_LIST
+    importing
+      value(P_LANGU) type SYST-LANGU default SY-LANGU
+      !P_INCLUDING_SUBSTRUCTRES type ABAP_BOOL default ABAP_FALSE
+    returning
+      value(P_FIELD_LIST) type DDFIELDS
+    exceptions
+      NOT_FOUND
+      NO_DDIC_TYPE .
+  class-methods GET
+    importing
+      !P_COMPONENTS type COMPONENT_TABLE
+      !P_STRICT type ABAP_BOOL default TRUE
+    returning
+      value(P_RESULT) type ref to CL_ABAP_STRUCTDESCR
+    raising
+      CX_SY_STRUCT_CREATION .
+  class-methods CREATE
+    importing
+      !P_COMPONENTS type COMPONENT_TABLE
+      !P_STRICT type ABAP_BOOL default TRUE
+    returning
+      value(P_RESULT) type ref to CL_ABAP_STRUCTDESCR
+    raising
+      CX_SY_STRUCT_CREATION .
+  methods GET_COMPONENTS
+    returning
+      value(P_RESULT) type COMPONENT_TABLE .
+  methods GET_INCLUDED_VIEW
+    importing
+      value(P_LEVEL) type I optional
+    returning
+      value(P_RESULT) type INCLUDED_VIEW .
+  methods GET_SYMBOLS
+    returning
+      value(P_RESULT) type SYMBOL_TABLE .
+  methods GET_COMPONENT_TYPE
+    importing
+      !P_NAME type ANY
+    returning
+      value(P_DESCR_REF) type ref to CL_ABAP_DATADESCR
+    exceptions
+      COMPONENT_NOT_FOUND
+      UNSUPPORTED_INPUT_TYPE .

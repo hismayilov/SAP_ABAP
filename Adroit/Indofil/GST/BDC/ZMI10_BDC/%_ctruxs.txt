@@ -1,0 +1,166 @@
+type-pool truxs .
+
+* Typ Vertragsnummer
+types truxs_ranl  type ranl.
+types truxs_t_ranl type truxs_ranl occurs 0.
+types: begin of truxs_struc_ranl,
+         sign(1),
+         option(2),
+         low  type truxs_ranl,
+         high type truxs_ranl,
+       end   of truxs_struc_ranl.
+types truxs_range_ranl type truxs_struc_ranl occurs 0.
+
+* Typ Anlageform
+types truxs_sanlf  type sanlf.
+types truxs_t_sanlf type truxs_sanlf occurs 0.
+types: begin of truxs_struc_sanlf,
+         sign(1),
+         option(2),
+         low  type truxs_sanlf,
+         high type truxs_sanlf,
+       end   of truxs_struc_sanlf.
+types truxs_range_sanlf type truxs_struc_sanlf occurs 0.
+
+* Typ BUKRS
+types truxs_bukrs  type bukrs.
+types truxs_t_bukrs type truxs_bukrs occurs 0.
+types: begin of truxs_struc_bukrs,
+         sign(1),
+         option(2),
+         low  type truxs_bukrs,
+         high type truxs_bukrs,
+       end   of truxs_struc_bukrs.
+types truxs_range_bukrs type truxs_struc_bukrs occurs 0.
+
+* Typ Partnr
+types truxs_partnr  like bp000-partnr.
+types truxs_t_partnr type truxs_partnr occurs 0.
+types: begin of truxs_struc_partnr,
+         sign(1),
+         option(2),
+         low  type truxs_partnr,
+         high type truxs_partnr,
+       end   of truxs_struc_partnr.
+types truxs_range_partnr type truxs_struc_partnr occurs 0.
+* Typ Customer
+types truxs_customer like bp000-customer.
+types truxs_t_customer type truxs_customer occurs 0.
+types: begin of truxs_struc_customer,
+         sign(1),
+         option(2),
+         low  type truxs_customer,
+         high type truxs_customer,
+       end   of truxs_struc_customer.
+types truxs_range_customer type truxs_struc_customer occurs 0.
+* Typ Rklammer
+types truxs_rklammer type rklammer.
+types truxs_t_rklammer type truxs_rklammer occurs 0.
+* Relation alte/neue Debitorennummer zu Partner
+types truxs_kunnr like knb1-kunnr.
+types truxs_altkn like knb1-altkn.
+types: begin of truxs_struc_oldnew_debitor,
+          partnr type truxs_partnr,
+          kunnr  type truxs_kunnr,
+          bukrs  like knb1-bukrs,
+          altkn  type truxs_altkn,
+       end of truxs_struc_oldnew_debitor.
+types truxs_oldnew_debitor type truxs_struc_oldnew_debitor occurs 0.
+* weitere types für Strukturprüfung
+types: begin of truxs_struc_buffered_values.
+        include structure dfies.
+types:     fieldvalues(72) type c,
+           domvalue_l      like dd07l-domvalue_l,
+           domvalue_h      like dd07l-domvalue_h,
+       end of truxs_struc_buffered_values.
+types truxs_buffered_values type truxs_struc_buffered_values occurs 0.
+types truxs_dfies like dfies occurs 0.
+
+types: begin of truxs_struct_error_fields,
+          tabname     like dfies-tabname,
+          fieldname   like dfies-fieldname,
+          fieldvalue  like sy-msgv1,
+       end   of truxs_struct_error_fields.
+types truxs_error_fields type truxs_struct_error_fields occurs 0.
+
+* Typ TABIX
+types truxs_tabix  like sy-tabix.
+types truxs_t_tabix type truxs_tabix occurs 0.
+
+* Type Relation Modulepool+ Dynnr to data structure
+
+types:  begin of truxs_struc_bdcdata_generate,
+            dynpro_langu      like sy-langu,
+            modulpool         like d020s-prog,
+            dynpro_nr         like d020s-dnum,
+            sub_modulpool     like d020s-prog,
+            sub_dynpro_nr     like d020s-dnum,
+            dynbegin          like bdcdata-dynbegin,
+            fieldname_ok_code like d021s-fnam,
+            ok_code           like sy-tcode,
+        end   of truxs_struc_bdcdata_generate.
+
+types: truxs_dynpros type truxs_struc_bdcdata_generate occurs 0.
+
+* Server Selection
+*    APP = Application Server
+*    PRS = Presentation Server
+*    OLE2 = OLE2 Server
+types: truxs_server    type trux_servertyp.
+
+* File formats:
+*    ASC  = Flat ASCII
+*    CSV  = Comma Separated Values
+*    TXT  = TXT Format (Notepad)
+*    HTM  = Hypertext Markup Language
+*    HTML = Hypertext Markup Language
+types: truxs_fileformat  type trtm_format.
+
+types truxs_t_text_data(4096) type c occurs 0.
+
+* Partnerumstellung
+* BP000
+types:  begin of truxs_struc_bp000,
+            partnr     like bp000-partnr,
+            extpartnr  like bp000-extpartnr,
+            customer   like bp000-customer,
+            adr_ref    like bp000-adr_ref,
+        end   of truxs_struc_bp000.
+types: truxs_t_bp000 type truxs_struc_bp000 occurs 0.
+
+* BP1000
+types:  begin of truxs_struc_bp1000,
+            partnr     like bp1000-partnr,
+            roletyp    like bp1000-roletyp,
+            role       like bp1000-role,
+        end   of truxs_struc_bp1000.
+types: truxs_t_bp1000 type truxs_struc_bp1000 occurs 0.
+
+* BPdbank
+types:  begin of truxs_struc_bpdbank.
+        include structure bpdbank.
+types:  end   of truxs_struc_bpdbank.
+types: truxs_t_bpdbank type truxs_struc_bpdbank occurs 0.
+
+* BPDAZAH
+types:  begin of truxs_struc_bpdazah,
+            partnr     like bpdazah-partnr,
+            customer   like bpdazah-customer,
+            bukrs      like bpdazah-bukrs,
+            zwels      like bpdazah-zwels,
+        end   of truxs_struc_bpdazah.
+types: truxs_t_bpdazah type truxs_struc_bpdazah occurs 0.
+
+types: begin of truxs_MEMORYID_parameter,
+         MEMORYID type MEMORYID,
+         field    type char40,
+       end of truxs_MEMORYID_parameter.
+types: truxs_tab_MEMORYID_parameter
+                        type table of truxs_MEMORYID_parameter
+                        initial size 0.
+
+types : begin of truxs_xml_line,
+            data(256) TYPE x,
+        end of truxs_xml_line.
+
+types: truxs_xml_table TYPE TABLE OF truxs_xml_line.

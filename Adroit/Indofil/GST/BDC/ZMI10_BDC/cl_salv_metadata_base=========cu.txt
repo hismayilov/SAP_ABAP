@@ -1,0 +1,9 @@
+class CL_SALV_METADATA_BASE definition
+  public
+  inheriting from CL_SALV_METADATA
+  abstract
+  create public .
+
+*"* public components of class CL_SALV_METADATA_BASE
+*"* do not include other source files here!!!
+public section.

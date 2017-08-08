@@ -1,0 +1,141 @@
+class CL_SALV_FUNCTIONS_LIST definition
+  public
+  inheriting from CL_SALV_FUNCTIONS
+  final
+  create public
+
+  global friends CL_SALV_CONTROLLER
+                 CL_SALV_MODEL_BASE
+                 CL_SALV_MODEL_LIST .
+
+public section.
+*"* public components of class CL_SALV_FUNCTIONS_LIST
+*"* do not include other source files here!!!
+
+  interface IF_SALV_C_BOOL_SAP load .
+  methods SET_ABC_ANALYSIS
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_AGGREGATION_AVERAGE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_AGGREGATION_COUNT
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_AGGREGATION_MAXIMUM
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_AGGREGATION_MINIMUM
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_AGGREGATION_TOTAL
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_DEFAULT
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_DETAIL
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_EXPORT_FOLDER
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_EXPORT_HTML
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_EXPORT_LOCALFILE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_EXPORT_MAIL
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_EXPORT_SEND
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_EXPORT_SPREADSHEET
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_EXPORT_WORDPROCESSOR
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_EXPORT_XML
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_FILTER
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_FILTER_DELETE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_GROUP_AGGREGATION
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_GROUP_EXPORT
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_GROUP_FILTER
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_GROUP_LAYOUT
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_GROUP_SORT
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_GROUP_SUBTOTAL
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_GROUP_VIEW
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_LAYOUT_CHANGE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_LAYOUT_LOAD
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_LAYOUT_MAINTAIN
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_LAYOUT_SAVE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_PRINT
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_PRINT_PREVIEW
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_SORT_ASC
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_SORT_DESC
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_SUBTOTALS
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_SUBTOTALS_OUTLINE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_VIEW_CRYSTAL
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_VIEW_EXCEL
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_VIEW_GRID
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_VIEW_LOTUS
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_FIND
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_FIND_MORE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_GRAPHICS
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .

@@ -1,0 +1,73 @@
+class CL_SALV_TABLE definition
+  public
+  inheriting from CL_SALV_MODEL_LIST
+  final
+  create private
+
+  global friends CL_SALV_ADAPTER
+                 CL_SALV_CONTROLLER
+                 CL_SALV_CONTROLLER_TABLE .
+
+public section.
+
+  methods GET_METADATA .
+  methods GET_FUNCTIONS
+    returning
+      value(VALUE) type ref to CL_SALV_FUNCTIONS_LIST .
+  interface IF_SALV_C_BOOL_SAP load .
+  class-methods FACTORY
+    importing
+      !LIST_DISPLAY type SAP_BOOL default IF_SALV_C_BOOL_SAP=>FALSE
+      !R_CONTAINER type ref to CL_GUI_CONTAINER optional
+      !CONTAINER_NAME type STRING optional
+    exporting
+      !R_SALV_TABLE type ref to CL_SALV_TABLE
+    changing
+      !T_TABLE type TABLE
+    raising
+      CX_SALV_MSG .
+  methods REFRESH
+    importing
+      !S_STABLE type LVC_S_STBL optional
+      !REFRESH_MODE type SALV_DE_CONSTANT default IF_SALV_C_REFRESH=>SOFT
+    preferred parameter S_STABLE .
+  methods GET_SORTS
+    returning
+      value(VALUE) type ref to CL_SALV_SORTS .
+  methods GET_SELECTIONS
+    returning
+      value(VALUE) type ref to CL_SALV_SELECTIONS .
+  methods GET_EVENT
+    returning
+      value(VALUE) type ref to CL_SALV_EVENTS_TABLE .
+  methods SET_DATA
+    changing
+      !T_TABLE type STANDARD TABLE
+    raising
+      CX_SALV_NO_NEW_DATA_ALLOWED .
+  methods DISPLAY .
+  methods GET_AGGREGATIONS
+    returning
+      value(VALUE) type ref to CL_SALV_AGGREGATIONS .
+  methods GET_FILTERS
+    returning
+      value(VALUE) type ref to CL_SALV_FILTERS .
+  methods GET_COLUMNS
+    returning
+      value(VALUE) type ref to CL_SALV_COLUMNS_TABLE .
+  interface IF_SALV_C_TABLE_OBJECTS load .
+  methods CONSTRUCTOR
+    importing
+      !DISPLAY_OBJECT type SALV_DE_CONSTANT default IF_SALV_C_TABLE_OBJECTS=>FULLSCREEN_GRID
+      !R_CONTAINER type ref to CL_GUI_CONTAINER optional
+      !CONTAINER_NAME type STRING optional .
+  interface IF_SALV_BS_C_TT load .
+  methods TO_XML
+    importing
+      !XML_TYPE type SALV_BS_CONSTANT
+      !XML_FLAVOUR type STRING default IF_SALV_BS_C_TT=>C_TT_XML_FLAVOUR_EXPORT
+    returning
+      value(XML) type XSTRING .
+
+  methods GET_DISPLAY_OBJECT
+    redefinition .

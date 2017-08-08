@@ -1,0 +1,24 @@
+class CX_SALV_NO_NEW_DATA_ALLOWED definition
+  public
+  inheriting from CX_SALV_STATIC_CHECK
+  final
+  create public .
+
+*"* public components of class CX_SALV_NO_NEW_DATA_ALLOWED
+*"* do not include other source files here!!!
+public section.
+
+  constants:
+    begin of CX_SALV_NO_NEW_DATA_ALLOWED,
+      msgid type symsgid value 'SALV_EXCEPTION',
+      msgno type symsgno value '002',
+      attr1 type scx_attrname value '',
+      attr2 type scx_attrname value '',
+      attr3 type scx_attrname value '',
+      attr4 type scx_attrname value '',
+    end of CX_SALV_NO_NEW_DATA_ALLOWED .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like IF_T100_MESSAGE=>T100KEY optional
+      !PREVIOUS like PREVIOUS optional .

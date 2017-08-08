@@ -1,0 +1,8 @@
+*"* components of interface IF_SALV_C_FUNCTION_POSITION
+interface IF_SALV_C_FUNCTION_POSITION
+  public .
+
+
+  constants LEFT_OF_SALV_FUNCTIONS type SALV_DE_FUNCTION_POS value 1. "#EC NOTEXT
+  constants RIGHT_OF_SALV_FUNCTIONS type SALV_DE_FUNCTION_POS value 2. "#EC NOTEXT
+endinterface.

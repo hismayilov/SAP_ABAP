@@ -1,0 +1,9 @@
+*"* components of interface IF_SALV_C_ALIGNMENT
+interface IF_SALV_C_ALIGNMENT
+  public .
+
+
+  constants LEFT type SALV_DE_ALIGNMENT value 1. "#EC NOTEXT
+  constants RIGHT type SALV_DE_ALIGNMENT value 2. "#EC NOTEXT
+  constants CENTERED type SALV_DE_ALIGNMENT value 3. "#EC NOTEXT
+endinterface.

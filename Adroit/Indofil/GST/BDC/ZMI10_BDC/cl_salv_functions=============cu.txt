@@ -1,0 +1,79 @@
+class CL_SALV_FUNCTIONS definition
+  public
+  inheriting from CL_SALV_METADATA_BASE
+  create public
+
+  global friends CL_SALV_CONTROLLER
+                 CL_SALV_MODEL_BASE
+                 CL_SALV_MODEL_LIST .
+
+public section.
+
+  interfaces IF_SALV_C_FUNCTION_POSITION .
+
+  methods ADD_FUNCTION
+    importing
+      !NAME type SALV_DE_FUNCTION
+      !ICON type STRING optional
+      !TEXT type STRING optional
+      !TOOLTIP type STRING
+      !POSITION type SALV_DE_FUNCTION_POS
+    raising
+      CX_SALV_EXISTING
+      CX_SALV_WRONG_CALL .
+  methods CONSTRUCTOR
+    importing
+      !R_CONTROLLER type ref to IF_SALV_CONTROLLER_METADATA optional .
+  methods ENABLE_FUNCTION
+    importing
+      !NAME type SALV_DE_FUNCTION
+      !BOOLEAN type SAP_BOOL
+    raising
+      CX_SALV_WRONG_CALL
+      CX_SALV_NOT_FOUND .
+  methods GET_FLAVOUR
+    returning
+      value(VALUE) type SALV_DE_CONSTANT .
+  methods GET_FUNCTIONS
+    returning
+      value(FUNCTION_LIST) type SALV_T_UI_FUNC .
+  methods IS_ENABLED
+    importing
+      !NAME type SALV_DE_FUNCTION
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_ITEM
+    importing
+      !NAME type SALV_DE_FUNCTION
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_SALV_FUNCTION
+    importing
+      !NAME type SALV_DE_FUNCTION
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_VISIBLE
+    importing
+      !NAME type SALV_DE_FUNCTION
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods REMOVE_FUNCTION
+    importing
+      !NAME type SALV_DE_FUNCTION
+    raising
+      CX_SALV_NOT_FOUND
+      CX_SALV_WRONG_CALL .
+  methods SET_ADAPTER_FC_HANDLING
+    importing
+      !VALUE type SAP_BOOL .
+  interface IF_SALV_C_BOOL_SAP load .
+  methods SET_ALL
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_FUNCTION
+    importing
+      !NAME type SALV_DE_FUNCTION
+      !BOOLEAN type SAP_BOOL
+    raising
+      CX_SALV_NOT_FOUND
+      CX_SALV_WRONG_CALL .

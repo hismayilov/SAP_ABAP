@@ -1,0 +1,16 @@
+class CX_SY_CONVERSION_ERROR definition
+  public
+  inheriting from CX_DYNAMIC_CHECK
+  abstract
+  create public .
+
+*"* public components of class CX_SY_CONVERSION_ERROR
+*"* do not include other source files here!!!
+public section.
+
+  constants CX_SY_CONVERSION_ERROR type SOTR_CONC value '7F5DB739AB5CE919E10000000A11447B'. "#EC NOTEXT
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional .

@@ -1,0 +1,234 @@
+class CL_SALV_COLUMN definition
+  public
+  inheriting from CL_SALV_METADATA_BASE
+  create public
+
+  global friends CL_SALV_ADAPTER
+                 CL_SALV_CONTROLLER
+                 CL_SALV_DATA_DESCR
+                 CL_SALV_DDIC_APPLY
+                 CL_SALV_SERVICE_LAYOUT_DB .
+
+public section.
+
+*"* public components of class CL_SALV_COLUMN
+*"* do not include other source files here!!!
+  interfaces IF_SALV_C_ALIGNMENT .
+
+  aliases CENTERED
+    for IF_SALV_C_ALIGNMENT~CENTERED .
+  aliases LEFT
+    for IF_SALV_C_ALIGNMENT~LEFT .
+  aliases RIGHT
+    for IF_SALV_C_ALIGNMENT~RIGHT .
+
+  methods SET_FIXED_HEADER_TEXT
+    importing
+      value(VALUE) type LVC_DDICT .
+  interface IF_SALV_C_BOOL_SAP load .
+  methods SET_LEADING_SPACES
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>FALSE .
+  methods HAS_LEADING_SPACES
+  final
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods CONSTRUCTOR
+    importing
+      !COLUMNNAME type LVC_FNAME
+      !R_COLUMNS type ref to CL_SALV_COLUMNS
+      !R_CONTROLLER type ref to IF_SALV_CONTROLLER_METADATA optional
+      !R_TABLE_STRUCTURE type ref to DATA .
+  methods GET_ALIGNMENT
+    returning
+      value(VALUE) type SALV_DE_ALIGNMENT .
+  methods GET_COLUMNNAME
+    returning
+      value(VALUE) type LVC_FNAME .
+  methods GET_CURRENCY
+    returning
+      value(VALUE) type LVC_CURR .
+  methods GET_CURRENCY_COLUMN
+    returning
+      value(VALUE) type LVC_CFNAME .
+  methods GET_DDIC_DATATYPE
+    returning
+      value(VALUE) type DATATYPE_D .
+  methods GET_DDIC_DECIMALS
+    returning
+      value(VALUE) type I .
+  methods GET_DDIC_DOMAIN
+    returning
+      value(VALUE) type DOMNAME .
+  methods GET_DDIC_INTLEN
+    returning
+      value(VALUE) type DECIMALS .
+  methods GET_DDIC_INTTYPE
+    returning
+      value(VALUE) type INTTYPE .
+  methods GET_DDIC_OUTPUTLEN
+    returning
+      value(VALUE) type OUTPUTLEN .
+  methods GET_DDIC_REFERENCE
+    returning
+      value(VALUE) type SALV_S_DDIC_REFERENCE .
+  methods GET_DDIC_ROLLNAME
+    returning
+      value(VALUE) type ROLLNAME .
+  methods GET_DECIMALS_COLUMN
+    returning
+      value(VALUE) type LVC_DFNAME .
+  methods GET_DECIMALS
+    returning
+      value(VALUE) type LVC_DECMLS .
+  methods GET_EDIT_MASK
+    returning
+      value(VALUE) type LVC_EDTMSK .
+  methods GET_F1_ROLLNAME
+    returning
+      value(VALUE) type LVC_ROLL .
+  methods GET_LONG_TEXT
+    returning
+      value(VALUE) type SCRTEXT_L .
+  methods GET_MEDIUM_TEXT
+    returning
+      value(VALUE) type SCRTEXT_M .
+  methods GET_OUTPUT_LENGTH
+    returning
+      value(VALUE) type LVC_OUTLEN .
+  methods GET_QUANTITY
+    returning
+      value(VALUE) type LVC_QUAN .
+  methods GET_QUANTITY_COLUMN
+    returning
+      value(VALUE) type LVC_QFNAME .
+  methods GET_ROUND
+    returning
+      value(VALUE) type LVC_ROUND .
+  methods GET_ROUND_COLUMN
+    returning
+      value(VALUE) type LVC_RNDFN .
+  methods GET_ROW
+    returning
+      value(VALUE) type LVC_COLPOS .
+  methods GET_SHORT_TEXT
+    returning
+      value(VALUE) type SCRTEXT_S .
+  methods GET_TOOLTIP
+    returning
+      value(VALUE) type LVC_TIP .
+  methods HAS_LEADING_ZERO
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods HAS_SIGN
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_LOWERCASE
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_OPTIMIZED
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_TECHNICAL
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_VISIBLE
+    returning
+      value(VALUE) type SAP_BOOL .
+  methods IS_ZERO
+    returning
+      value(VALUE) type SAP_BOOL .
+  interface IF_SALV_C_ALIGNMENT load .
+  methods SET_ALIGNMENT
+    importing
+      !VALUE type SALV_DE_ALIGNMENT default IF_SALV_C_ALIGNMENT=>LEFT .
+  methods SET_CURRENCY
+    importing
+      !VALUE type LVC_CURR .
+  methods SET_CURRENCY_COLUMN
+    importing
+      !VALUE type LVC_CFNAME
+    raising
+      CX_SALV_NOT_FOUND
+      CX_SALV_DATA_ERROR .
+  methods SET_DDIC_REFERENCE
+    importing
+      !VALUE type SALV_S_DDIC_REFERENCE .
+  methods SET_DECIMALS_COLUMN
+    importing
+      !VALUE type LVC_DFNAME
+    raising
+      CX_SALV_NOT_FOUND
+      CX_SALV_DATA_ERROR .
+  methods SET_DECIMALS
+    importing
+      !VALUE type LVC_DECMLS .
+  methods SET_EDIT_MASK
+    importing
+      !VALUE type LVC_EDTMSK .
+  methods SET_F1_ROLLNAME
+    importing
+      !VALUE type LVC_ROLL .
+  methods SET_LEADING_ZERO
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_LONG_TEXT
+    importing
+      !VALUE type SCRTEXT_L .
+  methods SET_LOWERCASE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_MEDIUM_TEXT
+    importing
+      !VALUE type SCRTEXT_M .
+  methods SET_OPTIMIZED
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_OUTPUT_LENGTH
+    importing
+      !VALUE type LVC_OUTLEN .
+  methods SET_QUANTITY
+    importing
+      !VALUE type LVC_QUAN .
+  methods SET_QUANTITY_COLUMN
+    importing
+      !VALUE type LVC_QFNAME
+    raising
+      CX_SALV_NOT_FOUND
+      CX_SALV_DATA_ERROR .
+  methods SET_ROUND
+    importing
+      !VALUE type LVC_ROUND .
+  methods SET_ROUND_COLUMN
+    importing
+      !VALUE type LVC_RNDFN
+    raising
+      CX_SALV_NOT_FOUND
+      CX_SALV_DATA_ERROR .
+  methods SET_ROW
+    importing
+      !VALUE type LVC_ROWPOS .
+  methods SET_SHORT_TEXT
+    importing
+      !VALUE type SCRTEXT_S .
+  methods SET_SIGN
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_TECHNICAL
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_TOOLTIP
+    importing
+      !VALUE type LVC_TIP .
+  methods SET_VISIBLE
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_ZERO
+    importing
+      !VALUE type SAP_BOOL default IF_SALV_C_BOOL_SAP=>TRUE .
+  methods SET_DECFLOAT_STYLE
+    importing
+      !VALUE type OUTPUTSTYLE .
+  methods GET_DECFLOAT_STYLE
+    returning
+      value(VALUE) type LVC_ROWPOS .

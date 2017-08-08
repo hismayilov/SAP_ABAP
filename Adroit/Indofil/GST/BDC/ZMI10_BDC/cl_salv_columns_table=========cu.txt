@@ -1,0 +1,17 @@
+class CL_SALV_COLUMNS_TABLE definition
+  public
+  inheriting from CL_SALV_COLUMNS_LIST
+  final
+  create public
+
+  global friends CL_SALV_ADAPTER
+                 CL_SALV_CONTROLLER .
+
+*"* public components of class CL_SALV_COLUMNS_TABLE
+*"* do not include other source files here!!!
+public section.
+
+  methods CONSTRUCTOR
+    importing
+      !R_DATA type ref to DATA
+      !R_CONTROLLER type ref to IF_SALV_CONTROLLER_METADATA .

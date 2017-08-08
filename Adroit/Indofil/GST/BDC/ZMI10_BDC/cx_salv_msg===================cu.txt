@@ -1,0 +1,31 @@
+class CX_SALV_MSG definition
+  public
+  inheriting from CX_SALV_ERROR
+  create public .
+
+*"* public components of class CX_SALV_MSG
+*"* do not include other source files here!!!
+public section.
+
+  data MSGID type SYMSGID read-only .
+  data MSGNO type SYMSGNO read-only .
+  data MSGTY type SYMSGTY read-only .
+  data MSGV1 type SYMSGV read-only .
+  data MSGV2 type SYMSGV read-only .
+  data MSGV3 type SYMSGV read-only .
+  data MSGV4 type SYMSGV read-only .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional
+      !MSGID type SYMSGID optional
+      !MSGNO type SYMSGNO optional
+      !MSGTY type SYMSGTY optional
+      !MSGV1 type SYMSGV optional
+      !MSGV2 type SYMSGV optional
+      !MSGV3 type SYMSGV optional
+      !MSGV4 type SYMSGV optional .
+
+  methods IF_ALV_MESSAGE~GET_MESSAGE
+    redefinition .

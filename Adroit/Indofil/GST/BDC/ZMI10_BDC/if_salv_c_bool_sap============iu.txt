@@ -1,0 +1,9 @@
+*"* components of interface IF_SALV_C_BOOL_SAP
+interface IF_SALV_C_BOOL_SAP
+  public .
+
+  type-pools ABAP .
+
+  constants TRUE type SAP_BOOL value ABAP_TRUE. "#EC NOTEXT
+  constants FALSE type SAP_BOOL value ABAP_FALSE. "#EC NOTEXT
+endinterface.

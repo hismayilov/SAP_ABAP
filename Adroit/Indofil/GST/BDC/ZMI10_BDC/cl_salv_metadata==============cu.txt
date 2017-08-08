@@ -1,0 +1,21 @@
+class CL_SALV_METADATA definition
+  public
+  abstract
+  create public .
+
+*"* public components of class CL_SALV_METADATA
+*"* do not include other source files here!!!
+public section.
+
+  interfaces IF_SALV_C_BOOL_SAP .
+  interfaces IF_SERIALIZABLE_OBJECT .
+
+  aliases FALSE
+    for IF_SALV_C_BOOL_SAP~FALSE .
+  aliases TRUE
+    for IF_SALV_C_BOOL_SAP~TRUE .
+
+  methods CONSTRUCTOR
+    importing
+      !R_CONTROLLER type ref to IF_SALV_CONTROLLER_METADATA
+      !NAME type STRING optional .

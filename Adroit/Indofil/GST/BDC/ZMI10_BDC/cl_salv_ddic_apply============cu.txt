@@ -1,0 +1,22 @@
+class CL_SALV_DDIC_APPLY definition
+  public
+  final
+  create public .
+
+*"* public components of class CL_SALV_DDIC_APPLY
+*"* do not include other source files here!!!
+public section.
+
+  constants C_APPLY_DDIC_BY_COLUMNNAME type SALV_DE_CONSTANT value 1. "#EC NOTEXT
+  constants C_APPLY_DDIC_BY_ROLLNAME type SALV_DE_CONSTANT value 2. "#EC NOTEXT
+  constants C_APPLY_DDIC_BY_DOMAIN type SALV_DE_CONSTANT value 3. "#EC NOTEXT
+
+  class-methods TO_COLUMN
+    importing
+      !R_COLUMN type ref to CL_SALV_COLUMN
+      !S_DFIES type DFIES .
+  class-methods TO_COLUMNS
+    importing
+      !R_COLUMNS type ref to CL_SALV_COLUMNS
+      !T_DFIES type DDFIELDS
+      !APPLY_METHOD type I default C_APPLY_DDIC_BY_COLUMNNAME .

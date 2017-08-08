@@ -1,0 +1,27 @@
+class CX_SALV_WRONG_CALL definition
+  public
+  inheriting from CX_SALV_ACCESS_ERROR
+  create public .
+
+*"* public components of class CX_SALV_WRONG_CALL
+*"* do not include other source files here!!!
+public section.
+
+  constants:
+    begin of CX_SALV_WRONG_CALL,
+      msgid type symsgid value 'SALV_EXCEPTION',
+      msgno type symsgno value '013',
+      attr1 type scx_attrname value 'OBJECT',
+      attr2 type scx_attrname value 'KEY',
+      attr3 type scx_attrname value 'CLASS',
+      attr4 type scx_attrname value 'METHOD',
+    end of CX_SALV_WRONG_CALL .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like IF_T100_MESSAGE=>T100KEY optional
+      !PREVIOUS like PREVIOUS optional
+      !OBJECT type STRING optional
+      !KEY type STRING optional
+      !CLASS type STRING optional
+      !METHOD type STRING optional .

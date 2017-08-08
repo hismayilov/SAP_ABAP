@@ -1,0 +1,11 @@
+*"* components of interface IF_SALV_C_TABLE_OBJECTS
+interface IF_SALV_C_TABLE_OBJECTS
+  public .
+
+
+  constants LIST type SALV_DE_CONSTANT value 1. "#EC NOTEXT
+  constants FULLSCREEN_GRID type SALV_DE_CONSTANT value 2. "#EC NOTEXT
+  constants GRID type SALV_DE_CONSTANT value 3. "#EC NOTEXT
+  constants HIERSEQ type SALV_DE_CONSTANT value 4. "#EC NOTEXT
+  constants TREE type SALV_DE_CONSTANT value 5. "#EC NOTEXT
+endinterface.
