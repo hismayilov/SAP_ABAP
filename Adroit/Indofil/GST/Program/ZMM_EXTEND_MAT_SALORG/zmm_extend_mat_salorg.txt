@@ -117,10 +117,13 @@ SELECTION-SCREEN END OF BLOCK b1.
 
 * Start of Main *
 START-OF-SELECTION.
+
   PERFORM validation.
   PERFORM data_retreival.
-  PERFORM check_extensibility.
   PERFORM sfg_specific_processing.
+
+END-OF-SELECTION.
+  PERFORM check_extensibility.
   PERFORM material_extension.
   IF  answer EQ '1'.
     PERFORM log_output.
@@ -138,7 +141,7 @@ FORM data_retreival .
   SELECT *
     FROM mara
     INTO TABLE it_mara
-    WHERE matnr IN s_matnr.   " Add filter for ZRAW, ZPKG, ZSFG ?
+  WHERE matnr IN s_matnr.   " Add filter for ZRAW, ZPKG, ZSFG ?
 
   IF it_mara[] IS NOT INITIAL.
     " Get materials that belong to the given plant from the list of valid ones
@@ -147,7 +150,7 @@ FORM data_retreival .
       INTO TABLE it_marc
       FOR ALL ENTRIES IN it_mara
       WHERE matnr = it_mara-matnr
-      AND   werks = p_werks.
+    AND   werks = p_werks.
 
     IF it_marc[] IS NOT INITIAL.
       " Get materials that have already been extended to the given combination
@@ -157,7 +160,7 @@ FORM data_retreival .
         FOR ALL ENTRIES IN it_marc
         WHERE matnr = it_marc-matnr
         AND   vkorg = p_vkorg
-        AND   vtweg = p_vtweg.
+      AND   vtweg = p_vtweg.
 
       IF it_view[] IS NOT INITIAL.
         " Get materials that have been extended but contain wrong tax classification
@@ -177,7 +180,7 @@ FORM data_retreival .
                   taxm8 NE '0' OR
                   taxm9 NE '0' ) )
           OR ( aland EQ 'BE'
-          AND taxm1 NE '0' ) ).
+        AND taxm1 NE '0' ) ).
       ENDIF.
     ENDIF.
   ENDIF.
@@ -435,7 +438,7 @@ FORM material_extension .
             SELECT SINGLE *
               FROM mvke
               INTO wa_mvke
-              WHERE matnr = material.
+            WHERE matnr = material.
 *              AND   vkorg = p_vkorg.   " May not be maintained for the given sal. org
 
             IF wa_mvke IS NOT INITIAL.
@@ -536,7 +539,11 @@ FORM material_extension .
             IF sy-subrc = 0.
               wa_log-msg = 'Tax classification updated'.
             ELSE.
-              wa_log-msg   = return-message.
+              IF headdata-matl_type EQ 'ZSFG'.  " Add parent FG for ref in log
+                CONCATENATE return-message 'as per' material INTO wa_log-msg SEPARATED BY space.
+              ELSE.
+                wa_log-msg   = return-message.
+              ENDIF.  " IF headdata-matl_type
             ENDIF.
             " End read it_mlan
             APPEND wa_log TO it_log.
@@ -715,7 +722,7 @@ FORM sfg_specific_processing .
     INTO TABLE it_sfg
     FOR ALL ENTRIES IN it_data
     WHERE matnr = it_data-matnr
-    AND   mtart = 'ZSFG'.
+  AND   mtart = 'ZSFG'.
 
   IF it_sfg[] IS NOT INITIAL.
     SELECT *
@@ -723,6 +730,6 @@ FORM sfg_specific_processing .
       INTO TABLE it_mast
       FOR ALL ENTRIES IN it_sfg
       WHERE matnr = it_sfg-matnr
-      AND   werks = p_werks.
+    AND   werks = p_werks.
   ENDIF.
 ENDFORM.
