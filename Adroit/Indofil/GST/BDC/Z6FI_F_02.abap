@@ -249,7 +249,7 @@ FORM upload_data .
   " End Repeat popup of after 3rd screen
   " End 1st Accounting Entry
 
-  DATA: ind TYPE i.
+  DATA: ind TYPE i.  " Index/Indicator
   DATA: lines TYPE i.
 
   DESCRIBE TABLE i_upload LINES lines.  " Count excel lines
