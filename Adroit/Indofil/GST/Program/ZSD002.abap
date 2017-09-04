@@ -421,7 +421,7 @@ DATA: BEGIN OF wa_mara,
         extwg TYPE extwg,
       END OF wa_mara,
       it_mara LIKE STANDARD TABLE OF wa_mara.
-* ---- Added for Material HSN Code/Decr on Sunday, September 03, 2017 12:33:09 ---- *
+* ---- Added for Material HSN Code/Decr on Sunday, September 03, 2017 12:33:09 => SaurabhK ---- *
 DATA: BEGIN OF wa_marc,
         matnr TYPE marc-matnr,
         steuc TYPE marc-steuc,
@@ -931,7 +931,7 @@ FORM initialize_fieldcat USING p_fieldtab TYPE slis_t_fieldcat_alv.
 *    fieldcat-fix_column = 'X'.
   APPEND fieldcat TO fieldtab.
   CLEAR fieldcat.
-* --- Added for HSN Code on Sunday, September 03, 2017 12:48:34 --- *
+* --- Added for HSN Code on Sunday, September 03, 2017 12:48:34 => SaurabhK --- *
   fieldcat-tabname = 'IVBRP1'.
   fieldcat-fieldname = 'HSN_NO'.
 *  fieldcat-col_pos       = '8'.
@@ -2365,7 +2365,7 @@ FORM initialize_fieldcat USING p_fieldtab TYPE slis_t_fieldcat_alv.
   APPEND fieldcat TO p_fieldtab.
   CLEAR fieldcat.
 *************************End*********************************
-* ---- Added for Original Invoice for Cancelled Invoices ---- *
+* ---- Added for Original Invoice for Cancelled Invoices => SaurabhK ---- *
   fieldcat-fieldname     = 'ORIG_INV'.
   fieldcat-tabname       = 'IVBRP1'.
   fieldcat-col_pos       = '100'.
@@ -3124,7 +3124,7 @@ FORM get_data_into_ivbrp1.
         ivbrp1-l_bezei = wa_tvgrt-bezei.
       ENDIF.
 
-* ---- Added for HSN Code on Sunday, September 03, 2017 12:46:55 ---- *
+* ---- Added for HSN Code on Sunday, September 03, 2017 12:46:55 => SaurabhK ---- *
       CLEAR wa_marc.
       READ TABLE it_marc INTO wa_marc WITH KEY matnr = ivbrp1-matnr.
 *                                               werks = ivbrp1-werks.
@@ -4647,7 +4647,7 @@ FORM chk_auth_obj .
 *   flag_all = 'X'.
 * ENDIF.
 * Reason: This flag was later checked and if found true a line containing low = '' was appened to the selection option *
-* Such a line has to be added as certain documents contain empty values(space) for this fields => to fetch these documents *
+* Such a line has to be added as certain documents contain empty values(space) for these fields => to fetch these documents *
 * But if such documents indeed need to be fetched then they should be fetched irrespective of whether the user has ...
 * supplied any value in select options or not, hence this check is removed
 
@@ -4920,8 +4920,6 @@ FORM chk_auth_obj .
     ENDLOOP.
   ENDIF.
 *ENDIF.
-
-
 
 *  IF flag_all = 'X'.
 *  IF s_vkbur[] IS INITIAL.
