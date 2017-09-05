@@ -556,6 +556,20 @@ DATA: lv_auth_bukrs_flg,                              " added by Naren Karra on 
       lv_auth_kvgr1_flg,                              " added by NK on 14.10.2015
       lv_auth_vkgrp_flg,                              " added by NK on 14.10.2015
       lv_auth_ktgrd_flg.                              " added by NK on 23.12.2015
+
+* ---- Added for fetching orig inv of RE type documents ---- *
+* ---- SaurabhK - Tuesday, September 05, 2017 14:45:23 ---- *
+* ---- IRDK929094 ---- *
+DATA i_vbeln            TYPE vbfa-vbeln.
+DATA i_posnn            TYPE vbfa-posnn.
+DATA i_vbtyp_n          TYPE vbfa-vbtyp_n VALUE 'O'.
+DATA i_vbtyp_v          TYPE vbfa-vbtyp_v VALUE 'M'.
+*DATA I_BYPASSING_BUFFER TYPE C.
+*DATA I_REFRESH_BUFFER   TYPE C.
+DATA et_vbfavb          TYPE STANDARD TABLE OF vbfavb.
+DATA et_vbfa            TYPE STANDARD TABLE OF vbfa.
+DATA ew_vbfa            LIKE LINE OF et_vbfa.
+* ---- End of addition for RE type doc ---- *
 ************************************************************************
 *                           DECLARATIOM FOR ALV
 ************************************************************************
@@ -3072,10 +3086,39 @@ FORM get_data_into_ivbrp1.
 * ---- Added for fetching Corresp. Original Invoice of Cancelled Invoice 'S1' or 'RE' => SaurabhK ---- *
 * ---- Monday, September 04, 2017 23:45:58 ---- *
 * ---- IRDK929081 ---- *
-      IF ( ivbrp1-fkart EQ 'S1' OR ivbrp1-fkart EQ 'RE' ) AND ivbrp1-vbtyp EQ 'N'.
-        MOVE ivbrp1-sfakn TO ivbrp1-orig_inv.
+      IF ivbrp1-fkart EQ 'S1' AND ivbrp1-vbtyp EQ 'N'.
+        MOVE ivbrp1-sfakn TO ivbrp1-orig_inv.     " Canc. Bill Doc.
         MOVE ivbrp1-posnr TO ivbrp1-orig_inv_itm.
-
+      ENDIF.
+* ---- IRDK929094 ---- *
+      IF ivbrp1-fkart EQ 'RE' AND ivbrp1-vbtyp EQ 'O'.
+        CLEAR: i_vbeln, i_posnn, ew_vbfa.
+        MOVE ivbrp1-vbeln TO i_vbeln.
+        MOVE ivbrp1-posnr TO i_posnn.
+        CALL FUNCTION 'WB2_VBFA_READ_WITH_VBELN'
+          EXPORTING
+            i_vbeln          = i_vbeln
+            i_posnn          = i_posnn
+            i_vbtyp_n        = i_vbtyp_n
+            i_vbtyp_v        = i_vbtyp_v
+          TABLES
+            et_vbfavb        = et_vbfavb
+            et_vbfa          = et_vbfa
+          EXCEPTIONS
+            record_not_found = 1
+            OTHERS           = 2.
+        IF sy-subrc <> 0.
+* Implement suitable error handling here
+        ELSE.
+          READ TABLE et_vbfa INTO ew_vbfa WITH KEY vbeln = i_vbeln
+          posnn = i_posnn.
+          IF sy-subrc = 0.
+            MOVE ew_vbfa-vbelv TO ivbrp1-orig_inv.  " Ret. Bill Doc.
+            MOVE ew_vbfa-posnv TO ivbrp1-orig_inv_itm.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+      IF ivbrp1-orig_inv IS NOT INITIAL.  " Doc type of orig inv
         SELECT SINGLE fkart FROM vbrk INTO ivbrp1-orig_inv_typ WHERE vbeln EQ ivbrp1-orig_inv.
       ENDIF.
 * ---- End of addition ---- *
@@ -3696,7 +3739,7 @@ FORM data_into_ivbrp2_ivbrp3_ivbrp.
       ENDON.
     ENDLOOP.
     PERFORM display-output-head TABLES ivbrp1 iitem
-                                USING 'IITEM' 'IVBRP1'.
+    USING 'IITEM' 'IVBRP1'.
   ENDIF.
 
   IF mat NE space .
@@ -4031,26 +4074,26 @@ ENDFORM.                    " GETDATA
 *  -->  P_IVBRP1_K1                                                   *
 *---------------------------------------------------------------------*
 FORM getdatasum USING     p_ivbrp1_knumv
-                          p_ivbrp1_posnr
-                CHANGING  p_ivbrp1_k1.
+      p_ivbrp1_posnr
+CHANGING  p_ivbrp1_k1.
   DATA:zpr0 LIKE konv-kwert,
        zcon LIKE konv-kwert,
        zexp LIKE konv-kwert.
 
   SELECT SINGLE kwert FROM konv INTO  zpr0
-    WHERE knumv = p_ivbrp1_knumv
-    AND kposn EQ  p_ivbrp1_posnr
-    AND kschl EQ 'ZPR0' AND kinak NE 'X'.
+  WHERE knumv = p_ivbrp1_knumv
+  AND kposn EQ  p_ivbrp1_posnr
+  AND kschl EQ 'ZPR0' AND kinak NE 'X'.
 
   SELECT SINGLE kwert FROM konv INTO  zcon
-    WHERE knumv = p_ivbrp1_knumv
-    AND kposn EQ  p_ivbrp1_posnr
-    AND kschl EQ 'ZCON' AND kinak NE 'X'.
+  WHERE knumv = p_ivbrp1_knumv
+  AND kposn EQ  p_ivbrp1_posnr
+  AND kschl EQ 'ZCON' AND kinak NE 'X'.
 
   SELECT SINGLE kwert FROM konv INTO  zexp
-    WHERE knumv = p_ivbrp1_knumv
-    AND kposn EQ  p_ivbrp1_posnr
-    AND kschl EQ 'ZEXP' AND kinak NE 'X'.
+  WHERE knumv = p_ivbrp1_knumv
+  AND kposn EQ  p_ivbrp1_posnr
+  AND kschl EQ 'ZEXP' AND kinak NE 'X'.
 
   p_ivbrp1_k1 = zpr0 + zcon + zexp.
 
