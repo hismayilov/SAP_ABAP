@@ -52,16 +52,18 @@
     CLEAR: wa_check.
 * ---- Checks for company code 1000 ---- *
     IF wa_vbak-bukrs_vf EQ '1000' AND wa_vbak-vtweg EQ '20'.
-*      IF it_vbkd IS NOT INITIAL.
-      LOOP AT it_vbkd INTO wa_vbkd.
+      LOOP AT it_vbap INTO wa_vbap.
+        CLEAR wa_vbkd.
+        READ TABLE it_vbkd INTO wa_vbkd WITH KEY posnr = wa_vbap-posnr.
         " Condition group should not be empty/is mandatory...
-        IF  wa_vbkd-kdkg1 IS INITIAL
+        IF  ( wa_vbkd-kdkg1 IS INITIAL
         AND wa_vbkd-kdkg2 IS INITIAL
         AND wa_vbkd-kdkg3 IS INITIAL
         AND wa_vbkd-kdkg4 IS INITIAL
-        AND wa_vbkd-kdkg5 IS INITIAL.
+        AND wa_vbkd-kdkg5 IS INITIAL )
+        OR  sy-subrc <> 0.
           CLEAR lv_msg.
-          CONCATENATE 'Item' wa_vbkd-posnr ': Condition group in Additional data A is mandatory'
+          CONCATENATE 'Item' wa_vbap-posnr ': Condition group in Additional data A is mandatory'
                 INTO lv_msg
                 SEPARATED BY space.
 
@@ -70,58 +72,50 @@
           MOVE-CORRESPONDING wa_vbkd TO wa_check.
           APPEND wa_check TO it_check.
         ENDIF.
-        CLEAR: wa_vbkd, wa_check.
+        CLEAR: wa_vbap, wa_check.
       ENDLOOP.
 
       " ...And should be identical for all line items
       IF it_check IS NOT INITIAL.
+        SORT it_check ASCENDING BY kdkg1 kdkg2 kdkg3 kdkg4 kdkg5.
         DELETE ADJACENT DUPLICATES FROM it_check COMPARING kdkg1 kdkg2 kdkg3 kdkg4 kdkg5.
         IF lines( it_check ) GT 1.
           MESSAGE 'Condition group data for all items should be identical. Please check Additional data A.'
           TYPE 'E'.
         ENDIF.
       ENDIF.
-*      ELSE.
-*        CLEAR lv_msg.
-*        CONCATENATE 'Condition Group in Additional Data A missing' space
-*              INTO lv_msg
-*              SEPARATED BY space.
-*
-*        MESSAGE lv_msg TYPE 'E'.
-*      ENDIF.
     ENDIF.
 * ---- Checks for company code 2000 ---- *
     IF wa_vbak-bukrs_vf EQ '2000' AND wa_vbak-vtweg EQ '20'.   .
-      LOOP AT it_vbkd INTO wa_vbkd.
-        CLEAR: wa_vbap.
-        READ TABLE it_vbap INTO wa_vbap WITH KEY  vbeln = wa_vbkd-vbeln
-                                                  posnr = wa_vbkd-posnr
-                                                  werks = '2101'.
+      LOOP AT it_vbap INTO wa_vbap.
+        CLEAR: wa_vbkd.
+        READ TABLE it_vbkd INTO wa_vbkd WITH KEY  posnr = wa_vbap-posnr.
         " For items with plant 2101, condition group should not be supplied...
-        IF sy-subrc = 0.
+        IF wa_vbap-werks EQ '2101'.
           IF wa_vbkd-kdkg1 IS NOT INITIAL
           OR wa_vbkd-kdkg2 IS NOT INITIAL
           OR wa_vbkd-kdkg3 IS NOT INITIAL
           OR wa_vbkd-kdkg4 IS NOT INITIAL
           OR wa_vbkd-kdkg5 IS NOT INITIAL.
             CLEAR lv_msg.
-            CONCATENATE 'Item' wa_vbkd-posnr ': Condition group in Additional data A should not be supplied for plant' wa_vbap-werks
-                  INTO lv_msg
-                  SEPARATED BY space.
+            CONCATENATE 'Item' wa_vbap-posnr ': Condition group in Additional data A should not be supplied for plant' wa_vbap-werks
+            INTO lv_msg
+            SEPARATED BY space.
 
             MESSAGE lv_msg TYPE 'E'.
           ENDIF.
-        " ...For all other items it is mandatory...
         ELSE.
-          IF  wa_vbkd-kdkg1 IS INITIAL
+          " ...For all other items it is mandatory...
+          IF  ( wa_vbkd-kdkg1 IS INITIAL
           AND wa_vbkd-kdkg2 IS INITIAL
           AND wa_vbkd-kdkg3 IS INITIAL
           AND wa_vbkd-kdkg4 IS INITIAL
-          AND wa_vbkd-kdkg5 IS INITIAL.
+          AND wa_vbkd-kdkg5 IS INITIAL )
+          OR  sy-subrc <> 0.
             CLEAR lv_msg.
-            CONCATENATE 'Item' wa_vbkd-posnr ': Condition group in Additional data A is mandatory'
-                  INTO lv_msg
-                  SEPARATED BY space.
+            CONCATENATE 'Item' wa_vbap-posnr ': Condition group in Additional data A is mandatory'
+            INTO lv_msg
+            SEPARATED BY space.
 
             MESSAGE lv_msg TYPE 'E'.
           ELSE.
@@ -129,11 +123,12 @@
             APPEND wa_check TO it_check.
           ENDIF.
         ENDIF.
-        CLEAR: wa_vbkd, wa_check.
+        CLEAR: wa_vbap, wa_check.
       ENDLOOP.
 
       " ...And should be identical for all items
       IF it_check IS NOT INITIAL.
+        SORT it_check ASCENDING BY kdkg1 kdkg2 kdkg3 kdkg4 kdkg5.
         DELETE ADJACENT DUPLICATES FROM it_check COMPARING kdkg1 kdkg2 kdkg3 kdkg4 kdkg5.
         IF lines( it_check ) GT 1.
           MESSAGE 'Condition group data for all items should be identical. Please check Additional data A.'
@@ -143,27 +138,25 @@
     ENDIF.
 * ---- Checks for company code 2000 ---- *
     IF wa_vbak-bukrs_vf EQ '2050' AND wa_vbak-vtweg EQ '20'.   .
-      LOOP AT it_vbkd INTO wa_vbkd.
-        CLEAR: wa_vbap.
-        READ TABLE it_vbap INTO wa_vbap WITH KEY  vbeln = wa_vbkd-vbeln
-                                                  posnr = wa_vbkd-posnr
-                                                  werks = '2510'.
+      LOOP AT it_vbap INTO wa_vbap.
+        CLEAR: wa_vbkd.
+        READ TABLE it_vbkd INTO wa_vbkd WITH KEY  posnr = wa_vbap-posnr.
         " For items with plant 2510, condition group should not be supplied
-        IF sy-subrc = 0.
+        IF wa_vbap-werks EQ '2510'.
           IF wa_vbkd-kdkg1 IS NOT INITIAL
           OR wa_vbkd-kdkg2 IS NOT INITIAL
           OR wa_vbkd-kdkg3 IS NOT INITIAL
           OR wa_vbkd-kdkg4 IS NOT INITIAL
           OR wa_vbkd-kdkg5 IS NOT INITIAL.
             CLEAR lv_msg.
-            CONCATENATE 'Item' wa_vbkd-posnr ': Condition group in Additional data A should not be supplied for plant' wa_vbap-werks
+            CONCATENATE 'Item' wa_vbap-posnr ': Condition group in Additional data A should not be supplied for plant' wa_vbap-werks
                   INTO lv_msg
                   SEPARATED BY space.
 
             MESSAGE lv_msg TYPE 'E'.
           ENDIF.
         ENDIF.
-        CLEAR: wa_vbkd.
+        CLEAR: wa_vbap.
       ENDLOOP.
     ENDIF.
   ENDIF.
